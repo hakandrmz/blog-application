@@ -1,0 +1,28 @@
+logging:
+  level:
+    org:
+      springframework:
+        security: debug
+app:
+  jwt-expiration-milliseconds: '604800000'
+  jwt-secret: jwtsecretkey
+spring:
+  application:
+    name: blogapp
+  datasource:
+    username: postgres
+    url: jdbc:postgresql://143.47.182.172:5432/blogapp
+    password: password
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+      javax:
+        persistence:
+          validation:
+            mode: none
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+server:
+  port: 8080
