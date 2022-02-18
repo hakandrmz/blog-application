@@ -1,4 +1,4 @@
-package guru.hakandurmaz.blog.utils.mapperConfig;
+package guru.hakandurmaz.blog.utils.MapperConfig;
 
 import guru.hakandurmaz.blog.entity.Post;
 import guru.hakandurmaz.blog.payload.post.PostRequest;

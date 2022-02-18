@@ -6,7 +6,7 @@ import guru.hakandurmaz.blog.payload.post.PostRequest;
 import guru.hakandurmaz.blog.payload.post.PostResponse;
 import guru.hakandurmaz.blog.repository.PostRepository;
 import guru.hakandurmaz.blog.service.PostService;
-import guru.hakandurmaz.blog.utils.mapperConfig.MapperService;
+import guru.hakandurmaz.blog.utils.MapperConfig.MapperService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

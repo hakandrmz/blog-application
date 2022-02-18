@@ -9,6 +9,9 @@ import guru.hakandurmaz.blog.repository.RoleRepository;
 import guru.hakandurmaz.blog.repository.UserRepository;
 import guru.hakandurmaz.blog.security.JwtTokenProvider;
 import guru.hakandurmaz.blog.service.AuthService;
+import guru.hakandurmaz.clients.emailcheck.MailCheckerResponse;
+import guru.hakandurmaz.clients.emailcheck.MailClient;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,11 +21,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
 @Service
+@AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
+
+    private final RestTemplate restTemplate;
+    private final MailClient mailClient;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -56,10 +64,19 @@ public class AuthServiceImpl implements AuthService {
 
             Role roles = roleRepository.findByName("ROLE_USER").orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST,"Role Bulunamadı."));
             user.setRoles(Collections.singleton(roles));
-            userRepository.save(user);
+            userRepository.saveAndFlush(user);
+            //TODO IS MAIL VALID
 
-            return "User succesfully registered.";
+            MailCheckerResponse mailCheckerResponse =
+                    mailClient.isIllegal(signupRequest.getEmail());
+
+            if(mailCheckerResponse.isIllegal()) {
+                throw new IllegalStateException("Mail adresi yasaklı.");
+            }else {
+                return "Kullanici Kaydedildi";
+            }
         }
+
     }
 
     @Override

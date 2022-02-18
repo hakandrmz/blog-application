@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.entity;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
