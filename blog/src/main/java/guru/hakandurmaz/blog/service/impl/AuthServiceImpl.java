@@ -11,6 +11,8 @@ import guru.hakandurmaz.blog.security.JwtTokenProvider;
 import guru.hakandurmaz.blog.service.AuthService;
 import guru.hakandurmaz.clients.emailcheck.MailCheckerResponse;
 import guru.hakandurmaz.clients.emailcheck.MailClient;
+import guru.hakandurmaz.clients.notification.NotificationClient;
+import guru.hakandurmaz.clients.notification.NotificationRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,8 +31,9 @@ import java.util.Collections;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final RestTemplate restTemplate;
     private final MailClient mailClient;
+    private final NotificationClient notificationClient;
+
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -66,6 +69,17 @@ public class AuthServiceImpl implements AuthService {
             user.setRoles(Collections.singleton(roles));
             userRepository.saveAndFlush(user);
             //TODO IS MAIL VALID
+
+            //register notification
+            notificationClient.sendNotification(
+                    new NotificationRequest(
+                            user.getId(),
+                            user.getEmail(),
+                            String.format("Welcome to my blog",user.getName()    )
+                    )
+            );
+
+
 
             MailCheckerResponse mailCheckerResponse =
                     mailClient.isIllegal(signupRequest.getEmail());

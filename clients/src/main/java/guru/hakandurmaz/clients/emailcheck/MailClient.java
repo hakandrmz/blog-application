@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
         value = "mailchecker"
 )
 public interface MailClient {
-
     @GetMapping(path = "api/mail-check/{mailAddress}")
     MailCheckerResponse isIllegal(@PathVariable("mailAddress") String mailAddress);
-
 }

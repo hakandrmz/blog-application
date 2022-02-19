@@ -7,6 +7,8 @@ import guru.hakandurmaz.blog.payload.post.PostResponse;
 import guru.hakandurmaz.blog.repository.PostRepository;
 import guru.hakandurmaz.blog.service.PostService;
 import guru.hakandurmaz.blog.utils.MapperConfig.MapperService;
+import guru.hakandurmaz.clients.notification.NotificationClient;
+import guru.hakandurmaz.clients.notification.NotificationRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,8 +35,11 @@ public class PostServiceImpl implements PostService {
         //convert dto to entity
         Post post = mapperService.mapToEntity(postRequest);
         Post newPost = postRepository.save(post);
+
+
         //convert entity to dto
         PostRequest postResponse = mapperService.mapToDto(newPost);
+
         return postResponse;
     }
 

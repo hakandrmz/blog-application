@@ -12,7 +12,9 @@
     <module>blog</module>
     <module>mailchecker</module>
     <module>eureka-server</module>
-      <module>clients</module>
+    <module>clients</module>
+      <module>notification</module>
+      <module>apigw</module>
   </modules>
 
   <name>blogapp</name>
