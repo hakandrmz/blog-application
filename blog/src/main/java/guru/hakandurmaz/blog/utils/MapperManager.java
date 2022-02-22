@@ -1,4 +1,4 @@
-package guru.hakandurmaz.blog.utils.MapperConfig;
+package guru.hakandurmaz.blog.utils;
 
 import guru.hakandurmaz.blog.entity.Post;
 import guru.hakandurmaz.blog.payload.post.PostRequest;
@@ -6,7 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MapperManager implements MapperService{
+public class MapperManager implements MapperService {
 
     private ModelMapper mapper;
 

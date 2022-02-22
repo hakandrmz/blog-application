@@ -33,22 +33,11 @@ public class AuthServiceImpl implements AuthService {
 
     private final MailClient mailClient;
     private final NotificationClient notificationClient;
-
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     @Transactional
@@ -56,7 +45,9 @@ public class AuthServiceImpl implements AuthService {
         if(userRepository.existsByUsername(signupRequest.getUsername())){
             return "Username is already taken!";
         }else if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return "Email is already exist!";
+            return "Email is already taken!";
+        }else if(this.isIllegalMail(signupRequest.getEmail())) {
+            return "Email is illegal to register";
         }else {
             //crete user object
             User user = new User();
@@ -67,35 +58,28 @@ public class AuthServiceImpl implements AuthService {
 
             Role roles = roleRepository.findByName("ROLE_USER").orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST,"Role Bulunamadı."));
             user.setRoles(Collections.singleton(roles));
-            userRepository.saveAndFlush(user);
-            //TODO IS MAIL VALID
 
-            //register notification
+            userRepository.saveAndFlush(user);
+
             notificationClient.sendNotification(
                     new NotificationRequest(
                             user.getId(),
                             user.getEmail(),
-                            String.format("Welcome to my blog",user.getName()    )
+                            String.format("Welcome to my blog",user.getName()
+                            )
                     )
             );
-
-
-
-            MailCheckerResponse mailCheckerResponse =
-                    mailClient.isIllegal(signupRequest.getEmail());
-
-            if(mailCheckerResponse.isIllegal()) {
-                throw new IllegalStateException("Mail adresi yasaklı.");
-            }else {
-                return "Kullanici Kaydedildi";
-            }
         }
-
+        return "User registered";
     }
 
     @Override
     @Transactional
     public String getToken(LoginRequest loginRequest) {
+
+        if(this.isIllegalMail(loginRequest.getUsernameOrEmail())) {
+            return "Email is illegal to login. Your email is banned.";
+        }
 
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
@@ -106,5 +90,14 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtTokenProvider.generateToken(authentication);
         return token;
 
+    }
+
+    private boolean isIllegalMail(String email) {
+        MailCheckerResponse mailCheckerResponse =
+                mailClient.isIllegal(email);
+        if(mailCheckerResponse.isIllegal()) {
+            return true;
+        }
+        return false;
     }
 }

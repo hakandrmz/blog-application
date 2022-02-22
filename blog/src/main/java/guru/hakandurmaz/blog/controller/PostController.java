@@ -1,9 +1,10 @@
 package guru.hakandurmaz.blog.controller;
 
-import guru.hakandurmaz.blog.payload.post.PostRequest;
-import guru.hakandurmaz.blog.payload.post.PostResponse;
+import guru.hakandurmaz.blog.payload.post.*;
 import guru.hakandurmaz.blog.service.PostService;
 import guru.hakandurmaz.blog.utils.AppConstants;
+import guru.hakandurmaz.blog.utils.results.DataResult;
+import guru.hakandurmaz.blog.utils.results.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,42 +24,38 @@ public class PostController {
         this.postService = postService;
     }
 
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<PostRequest> createPost(@Valid @RequestBody PostRequest postRequest){
-        return new ResponseEntity<>(postService.createPost(postRequest), HttpStatus.OK);
+    public Result createPost(@Valid @RequestBody CreatePostRequest postRequest){
+        return this.postService.createPost(postRequest);
     }
 
     @GetMapping
-    public PostResponse getAllPosts(
+    public DataResult<GetPostDto> getAllPosts(
             @RequestParam(value = "pageNo",defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,required = false) int pageNo,
             @RequestParam(value = "pageSize",defaultValue = AppConstants.DEFAULT_PAGE_SIZE,required = false) int pageSize,
             @RequestParam(value = "sortBy",defaultValue = AppConstants.DEFAULT_SORT_BY,required = false) String sortBy,
             @RequestParam(value = "sortDir",defaultValue =AppConstants.DEFAULT_SORT_DIRECTION,required = false) String sortDir
     ){
         log.info(postService.getAllPosts(pageNo,pageSize,sortBy,sortDir).toString());
-        return postService.getAllPosts(pageNo,pageSize,sortBy,sortDir);
+        return this.postService.getAllPosts(pageNo,pageSize,sortBy,sortDir);
     }
 
     @GetMapping(value = "{id}")
-    public ResponseEntity<PostRequest> getPostByIdV1(@PathVariable(name = "id") long id){
-        return ResponseEntity.ok(postService.getPostById(id));
+    public DataResult getPostById(@PathVariable(name = "id") long id){
+        return postService.getPostById(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{id}")
-    public ResponseEntity<PostRequest> updatePost(@ Valid @RequestBody PostRequest postRequest,
-                                                  @PathVariable(name = "id") long id){
-       PostRequest postResponse = postService.updatePost(postRequest,id);
-       return new ResponseEntity<>(postResponse,HttpStatus.OK);
+    public Result updatePost(@ Valid @RequestBody UpdatePostRequest postRequest){
+       return postService.updatePost(postRequest);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deletePost(@PathVariable(name = "id") long id){
-       postService.deletePostById(id);
-       return new ResponseEntity<>("Post entity deleted succesfully",HttpStatus.OK);
+    public Result deletePost(@PathVariable(name = "id") long id){
+       return postService.deletePostById(id);
     }
 
 }

@@ -1,12 +1,19 @@
 package guru.hakandurmaz.blog.service;
 
-import guru.hakandurmaz.blog.payload.post.PostRequest;
-import guru.hakandurmaz.blog.payload.post.PostResponse;
+import guru.hakandurmaz.blog.payload.post.*;
+import guru.hakandurmaz.blog.utils.results.DataResult;
+import guru.hakandurmaz.blog.utils.results.Result;
 
 public interface PostService {
-    PostRequest createPost(PostRequest postRequest);
-    PostResponse getAllPosts(int pageNo, int pageSize,String sortBy,String sortDir);
-    PostRequest getPostById(long id);
-    PostRequest updatePost(PostRequest postRequest, long id);
-    void deletePostById(long id);
+    Result createPost(CreatePostRequest createPostRequest);
+    DataResult<GetPostDto> getAllPosts(int pageNo, int pageSize,String sortBy,String sortDir);
+    DataResult<GetPostDto> getPostById(long id);
+    Result updatePost(UpdatePostRequest postRequest);
+    Result deletePostById(long id);
 }
+
+   //Result add(CreateCarRequest createCarRequest);
+   //DataResult<CarGetDto> getByCarId(int id);
+   //DataResult<List<CarListDto>> getAll();
+   //Result update(UpdateCarRequest updateCarRequest);
+   //Result delete(DeleteCarRequest deleteCarRequest);
