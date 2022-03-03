@@ -7,8 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(
-        scanBasePackages = {"guru.hakandurmaz.amqp",
-                            "guru.hakandurmaz.notification"
+        scanBasePackages = {
+                "guru.hakandurmaz.notification",
+                "guru.hakandurmaz.amqp"
         }
 )
 public class NotificationApplication {
@@ -16,17 +17,17 @@ public class NotificationApplication {
         SpringApplication.run(NotificationApplication.class, args);
     }
 
-    @Bean
-    CommandLineRunner commandLineRunner(RabbitMQMessageProducer producer,
-                                        NotificationConfig notificationConfig) {
-        return args -> {
-            producer.publish(new Person("Hakan",2),
-                    notificationConfig.getInternalExchange(),
-                    notificationConfig.getInternalNotificationRoutingKey());
-        };
-
-
-    }
-
-    record Person(String name,int age) {}
+    //@Bean
+    //CommandLineRunner commandLineRunner(RabbitMQMessageProducer producer,
+    //                                    NotificationConfig notificationConfig) {
+    //    return args -> {
+    //        producer.publish(new Person("Hakan",2),
+    //                notificationConfig.getInternalExchange(),
+    //                notificationConfig.getInternalNotificationRoutingKey());
+    //    };
+//
+//
+    //}
+//
+    //record Person(String name,int age) {}
 }

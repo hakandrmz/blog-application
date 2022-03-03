@@ -1,4 +1,4 @@
-package guru.hakandurmaz.blog.utils;
+package guru.hakandurmaz.blog.utils.mappers;
 
 import org.modelmapper.ModelMapper;
 

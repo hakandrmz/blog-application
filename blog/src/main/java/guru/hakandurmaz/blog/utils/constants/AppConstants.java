@@ -1,4 +1,4 @@
-package guru.hakandurmaz.blog.utils;
+package guru.hakandurmaz.blog.utils.constants;
 
 public class AppConstants {
     public static final String DEFAULT_PAGE_NUMBER="0";

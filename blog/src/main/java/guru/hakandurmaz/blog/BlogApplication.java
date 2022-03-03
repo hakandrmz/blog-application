@@ -7,11 +7,17 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(
+		scanBasePackages = {
+				"guru.hakandurmaz.blog",
+				"guru.hakandurmaz.amqp"
+		}
+)
 @EnableEurekaClient
 @EnableFeignClients(
 		basePackages = "guru.hakandurmaz.clients"
 )
+
 public class BlogApplication {
 
 	@Bean

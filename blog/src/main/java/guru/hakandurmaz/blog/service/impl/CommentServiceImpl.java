@@ -2,18 +2,15 @@ package guru.hakandurmaz.blog.service.impl;
 
 import guru.hakandurmaz.blog.entity.Comment;
 import guru.hakandurmaz.blog.entity.Post;
-import guru.hakandurmaz.blog.exception.BlogAPIException;
 import guru.hakandurmaz.blog.exception.ResourceNotFoundException;
 import guru.hakandurmaz.blog.payload.comment.CreateCommentRequest;
 import guru.hakandurmaz.blog.payload.comment.GetCommentDto;
-import guru.hakandurmaz.blog.payload.comment.CommentRequest;
 import guru.hakandurmaz.blog.payload.comment.UpdateCommentRequest;
 import guru.hakandurmaz.blog.repository.CommentRepository;
 import guru.hakandurmaz.blog.repository.PostRepository;
 import guru.hakandurmaz.blog.service.CommentService;
-import guru.hakandurmaz.blog.utils.ModelMapperService;
+import guru.hakandurmaz.blog.utils.mappers.ModelMapperService;
 import guru.hakandurmaz.blog.utils.results.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

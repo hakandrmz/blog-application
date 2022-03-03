@@ -1,4 +1,4 @@
-package guru.hakandurmaz.blog.utils;
+package guru.hakandurmaz.blog.utils.mappers;
 
 
 import org.modelmapper.ModelMapper;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ModelMapperManager implements ModelMapperService{
+public class ModelMapperManager implements ModelMapperService {
 
     private ModelMapper modelMapper;
 

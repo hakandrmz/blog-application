@@ -4,8 +4,7 @@ import guru.hakandurmaz.blog.entity.Post;
 import guru.hakandurmaz.blog.payload.post.*;
 import guru.hakandurmaz.blog.repository.PostRepository;
 import guru.hakandurmaz.blog.service.PostService;
-import guru.hakandurmaz.blog.utils.MapperService;
-import guru.hakandurmaz.blog.utils.ModelMapperService;
+import guru.hakandurmaz.blog.utils.mappers.ModelMapperService;
 import guru.hakandurmaz.blog.utils.results.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,12 +21,10 @@ import java.util.stream.Collectors;
 public class PostServiceImpl implements PostService {
 
     private PostRepository postRepository;
-    private MapperService mapperService;
     private ModelMapperService modelMapperService;
 
-    public PostServiceImpl(PostRepository postRepository,MapperService mapperService,ModelMapperService modelMapperService) {
+    public PostServiceImpl(PostRepository postRepository,ModelMapperService modelMapperService) {
         this.postRepository = postRepository;
-        this.mapperService = mapperService;
         this.modelMapperService = modelMapperService;
     }
 

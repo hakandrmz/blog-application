@@ -6,7 +6,7 @@ spring:
   datasource:
     password: password
     url: jdbc:postgresql://localhost:5432/notification
-    username: amigoscode
+    username: postgres
   jpa:
     hibernate:
       ddl-auto: update

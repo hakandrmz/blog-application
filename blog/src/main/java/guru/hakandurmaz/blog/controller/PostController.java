@@ -2,12 +2,10 @@ package guru.hakandurmaz.blog.controller;
 
 import guru.hakandurmaz.blog.payload.post.*;
 import guru.hakandurmaz.blog.service.PostService;
-import guru.hakandurmaz.blog.utils.AppConstants;
+import guru.hakandurmaz.blog.utils.constants.AppConstants;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.Result;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 

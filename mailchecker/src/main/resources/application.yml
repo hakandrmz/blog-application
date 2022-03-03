@@ -11,7 +11,7 @@ spring:
   datasource:
     password: password
     url: jdbc:postgresql://localhost:5432/mailchecker
-    username: amigoscode
+    username: postgres
   jpa:
     hibernate:
       ddl-auto: create-drop

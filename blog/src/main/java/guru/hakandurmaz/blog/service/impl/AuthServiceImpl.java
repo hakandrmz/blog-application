@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.service.impl;
 
+import guru.hakandurmaz.amqp.RabbitMQMessageProducer;
 import guru.hakandurmaz.blog.entity.Role;
 import guru.hakandurmaz.blog.entity.User;
 import guru.hakandurmaz.blog.exception.BlogAPIException;
@@ -32,15 +33,14 @@ import java.util.Collections;
 public class AuthServiceImpl implements AuthService {
 
     private final MailClient mailClient;
-    private final NotificationClient notificationClient;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RabbitMQMessageProducer rabbitMQMessageProducer;
 
     @Override
-    @Transactional
     public String registerUser(SignupRequest signupRequest) {
         if(userRepository.existsByUsername(signupRequest.getUsername())){
             return "Username is already taken!";
@@ -61,14 +61,19 @@ public class AuthServiceImpl implements AuthService {
 
             userRepository.saveAndFlush(user);
 
-            notificationClient.sendNotification(
-                    new NotificationRequest(
+            NotificationRequest notificationRequest = new NotificationRequest(
                             user.getId(),
                             user.getEmail(),
                             String.format("Welcome to my blog",user.getName()
                             )
-                    )
             );
+
+            rabbitMQMessageProducer.publish(
+                    notificationRequest,
+                    "internal.exchange",
+                    "internal.notification.routing-key"
+            );
+
         }
         return "User registered";
     }

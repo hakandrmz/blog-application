@@ -1,14 +1,11 @@
 package guru.hakandurmaz.blog.controller;
 
-import guru.hakandurmaz.blog.payload.comment.CommentRequest;
 import guru.hakandurmaz.blog.payload.comment.CreateCommentRequest;
 import guru.hakandurmaz.blog.payload.comment.GetCommentDto;
 import guru.hakandurmaz.blog.payload.comment.UpdateCommentRequest;
 import guru.hakandurmaz.blog.service.CommentService;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.Result;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
