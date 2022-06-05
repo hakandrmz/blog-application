@@ -1,0 +1,38 @@
+logging:
+  level:
+    org:
+      springframework:
+        security: debug
+app:
+  jwt-expiration-milliseconds: '604800000'
+  jwt-secret: jwtsecretkey
+spring:
+  application:
+    name: blogapp
+  datasource:
+    username: postgres
+    url: jdbc:postgresql://postgres:5432/blogapp
+    password: password
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+      javax:
+        persistence:
+          validation:
+            mode: none
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  zipkin:
+    base-url: http://zipkin:9411
+  rabbitmq:
+    addresses: rabbitmq:5672
+server:
+  port: 8080
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true

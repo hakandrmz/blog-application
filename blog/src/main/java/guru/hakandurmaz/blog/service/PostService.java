@@ -11,9 +11,3 @@ public interface PostService {
     Result updatePost(UpdatePostRequest postRequest);
     Result deletePostById(long id);
 }
-
-   //Result add(CreateCarRequest createCarRequest);
-   //DataResult<CarGetDto> getByCarId(int id);
-   //DataResult<List<CarListDto>> getAll();
-   //Result update(UpdateCarRequest updateCarRequest);
-   //Result delete(DeleteCarRequest deleteCarRequest);
