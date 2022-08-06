@@ -10,9 +10,9 @@ spring:
   application:
     name: blogapp
   datasource:
-    username: postgres
+    username: hdurmaz
     url: jdbc:postgresql://localhost:5432/blogapp
-    password: password
+    password: hdurmaz
   jpa:
     properties:
       hibernate:

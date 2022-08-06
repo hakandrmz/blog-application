@@ -9,12 +9,12 @@ spring:
   application:
     name: mailchecker
   datasource:
-    password: password
+    password: hdurmaz
     url: jdbc:postgresql://localhost:5432/mailchecker
-    username: postgres
+    username: hdurmaz
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

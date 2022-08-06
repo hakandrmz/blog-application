@@ -9,9 +9,9 @@ spring:
   application:
     name: mailchecker
   datasource:
-    password: password
+    password: hdurmaz
     url: jdbc:postgresql://postgres:5432/mailchecker
-    username: postgres
+    username: hdurmaz
   jpa:
     hibernate:
       ddl-auto: create-drop
