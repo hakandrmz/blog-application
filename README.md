@@ -15,5 +15,3 @@
 ### ModelMapper
 ### Lombok
 ### Validation
-
-### it is under development.
