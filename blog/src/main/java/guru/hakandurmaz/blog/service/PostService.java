@@ -1,8 +1,11 @@
 package guru.hakandurmaz.blog.service;
 
+import guru.hakandurmaz.blog.entity.Post;
 import guru.hakandurmaz.blog.payload.post.*;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.Result;
+
+import java.util.List;
 
 public interface PostService {
     Result createPost(CreatePostRequest createPostRequest);
@@ -10,4 +13,5 @@ public interface PostService {
     DataResult<GetPostDto> getPostById(long id);
     Result updatePost(UpdatePostRequest postRequest);
     Result deletePostById(long id);
+    DataResult listOfPosts(String query);
 }

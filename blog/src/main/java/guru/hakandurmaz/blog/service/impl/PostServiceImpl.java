@@ -87,6 +87,12 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
+    public DataResult listOfPosts(String query) {
+        List<Post> searchPosts = postRepository.searchPosts(query);
+        return new SuccessDataResult(searchPosts);
+    }
+
     private GetPostDto configureResponse(Page<Post> posts) {
         List<Post> listOfPosts = posts.getContent();
         List<PostRequest> content = listOfPosts.stream().map(post -> modelMapperService.forDto().map(post,PostRequest.class)).collect(Collectors.toList());

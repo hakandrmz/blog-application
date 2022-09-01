@@ -56,4 +56,8 @@ public class PostController {
        return postService.deletePostById(id);
     }
 
+    @GetMapping({"/search"})
+    public DataResult searchPost(@RequestParam("query") String query) {
+        return postService.listOfPosts(query);
+    }
 }
