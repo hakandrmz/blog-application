@@ -24,14 +24,12 @@ public class JwtTokenProvider {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime()+jwtExpirationMilliseconds);
 
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .signWith(SignatureAlgorithm.HS512,jwtSecret)
                 .compact();
-
-        return token;
     }
 
     //get username for token
