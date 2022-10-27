@@ -40,7 +40,7 @@ public class PostController {
     }
 
     @GetMapping(value = "{id}")
-    public DataResult getPostById(@PathVariable(name = "id") long id){
+    public DataResult<GetPostDto> getPostById(@PathVariable(name = "id") long id){
         return postService.getPostById(id);
     }
 

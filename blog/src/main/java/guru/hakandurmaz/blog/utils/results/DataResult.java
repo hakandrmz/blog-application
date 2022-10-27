@@ -2,7 +2,7 @@ package guru.hakandurmaz.blog.utils.results;
 
 public class DataResult<T> extends Result{
 
-private T data;
+	private T data;
 	
 	public DataResult (T data, boolean success, String message) {
 		
