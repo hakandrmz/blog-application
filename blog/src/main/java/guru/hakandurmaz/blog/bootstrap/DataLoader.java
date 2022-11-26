@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataLoader implements CommandLineRunner {
 
-    @Autowired
-    private RoleRepository roleRepository;
+  @Autowired
+  private RoleRepository roleRepository;
 
-    @Override
-    public void run(String... args) throws Exception {
-        if(roleRepository.findAll().isEmpty()) {
-            Role adminRole = new Role();
-            adminRole.setName("ROLE_ADMIN");
-            roleRepository.save(adminRole);
-            Role userRole = new Role();
-            userRole.setName("ROLE_USER");
-            roleRepository.save(userRole);
-        }
+  @Override
+  public void run(String... args) throws Exception {
+    if (roleRepository.findAll().isEmpty()) {
+      Role adminRole = new Role();
+      adminRole.setName("ROLE_ADMIN");
+      roleRepository.save(adminRole);
+      Role userRole = new Role();
+      userRole.setName("ROLE_USER");
+      roleRepository.save(userRole);
     }
+  }
 }

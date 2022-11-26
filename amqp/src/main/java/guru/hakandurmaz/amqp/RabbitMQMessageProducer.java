@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class RabbitMQMessageProducer {
 
-    private final AmqpTemplate amqpTemplate;
+  private final AmqpTemplate amqpTemplate;
 
-    public void publish(Object payload, String exchange,String routingkey) {
-        log.info("Publishing to {} using routing key {}. Payload : {}",exchange,routingkey,payload);
-        amqpTemplate.convertAndSend(exchange, routingkey, payload);
-        log.info("Published to {} using routing key {}. Payload : {}",exchange,routingkey,payload);
-    }
+  public void publish(Object payload, String exchange, String routingkey) {
+    log.info("Publishing to {} using routing key {}. Payload : {}", exchange, routingkey, payload);
+    amqpTemplate.convertAndSend(exchange, routingkey, payload);
+    log.info("Published to {} using routing key {}. Payload : {}", exchange, routingkey, payload);
+  }
 
 }

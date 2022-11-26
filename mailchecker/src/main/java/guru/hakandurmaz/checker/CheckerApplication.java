@@ -8,10 +8,11 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableEurekaClient
 @EnableFeignClients(
-        basePackages = "guru.hakandurmaz.clients"
+    basePackages = "guru.hakandurmaz.clients"
 )
 public class CheckerApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(CheckerApplication.class,args);
-    }
+
+  public static void main(String[] args) {
+    SpringApplication.run(CheckerApplication.class, args);
+  }
 }

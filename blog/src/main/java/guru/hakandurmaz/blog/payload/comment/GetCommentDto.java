@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetCommentDto {
-    private long id;
-    private String name;
-    private String email;
-    private String body;
+
+  private long id;
+  private String name;
+  private String email;
+  private String body;
 }

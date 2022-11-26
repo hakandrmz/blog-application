@@ -13,6 +13,7 @@ import guru.hakandurmaz.blog.service.AuthService;
 import guru.hakandurmaz.clients.emailcheck.MailCheckerResponse;
 import guru.hakandurmaz.clients.emailcheck.MailClient;
 import guru.hakandurmaz.clients.notification.NotificationRequest;
+import java.util.Collections;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,78 +24,72 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-
 @Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final MailClient mailClient;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RabbitMQMessageProducer rabbitMQMessageProducer;
+  private final MailClient mailClient;
+  private final UserRepository userRepository;
+  private final RoleRepository roleRepository;
+  private final AuthenticationManager authenticationManager;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final RabbitMQMessageProducer rabbitMQMessageProducer;
 
-    @Override
-    public String registerUser(SignupRequest signupRequest) {
-        if (Boolean.TRUE.equals(userRepository.existsByUsername(signupRequest.getUsername()))) {
-            return "Username is already taken!";
-        } else if (Boolean.TRUE.equals(userRepository.existsByEmail(signupRequest.getEmail()))) {
-            return "Email is already taken!";
-        } else if (this.isIllegalMail(signupRequest.getEmail())) {
-            return "Email is illegal to register";
-        } else {
-            //crete user object
-            User user = new User();
-            user.setEmail(signupRequest.getEmail());
-            user.setUsername(signupRequest.getUsername());
-            user.setName(signupRequest.getName());
-            user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+  @Override
+  public String registerUser(SignupRequest signupRequest) {
+    if (Boolean.TRUE.equals(userRepository.existsByUsername(signupRequest.getUsername()))) {
+      return "Username is already taken!";
+    } else if (Boolean.TRUE.equals(userRepository.existsByEmail(signupRequest.getEmail()))) {
+      return "Email is already taken!";
+    } else if (this.isIllegalMail(signupRequest.getEmail())) {
+      return "Email is illegal to register";
+    } else {
+      //crete user object
+      User user = new User();
+      user.setEmail(signupRequest.getEmail());
+      user.setUsername(signupRequest.getUsername());
+      user.setName(signupRequest.getName());
+      user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
 
-            Role roles = roleRepository.findByName("ROLE_USER").orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Bulunamadı."));
-            user.setRoles(Collections.singleton(roles));
+      Role roles = roleRepository.findByName("ROLE_USER")
+          .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Bulunamadı."));
+      user.setRoles(Collections.singleton(roles));
 
-            userRepository.saveAndFlush(user);
+      userRepository.saveAndFlush(user);
 
-            NotificationRequest notificationRequest = new NotificationRequest(
-                    user.getId(),
-                    user.getEmail(),
-                    "Welcome to my blog" + user.getName()
+      NotificationRequest notificationRequest = new NotificationRequest(user.getId(),
+          user.getEmail(), "Welcome to my blog" + user.getName()
 
-            );
+      );
 
-            rabbitMQMessageProducer.publish(
-                    notificationRequest,
-                    "internal.exchange",
-                    "internal.notification.routing-key"
-            );
-
-        }
-        return "User registered";
-    }
-
-    @Override
-    @Transactional
-    public String getToken(LoginRequest loginRequest) {
-
-        if (this.isIllegalMail(loginRequest.getUsernameOrEmail())) {
-            return "Email is illegal to login. Your email is banned.";
-        }
-
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return jwtTokenProvider.generateToken(authentication);
+      rabbitMQMessageProducer.publish(notificationRequest, "internal.exchange",
+          "internal.notification.routing-key");
 
     }
+    return "User registered";
+  }
 
-    private boolean isIllegalMail(String email) {
-        MailCheckerResponse mailCheckerResponse =
-                mailClient.isIllegal(email);
-        return Boolean.TRUE.equals(mailCheckerResponse.isIllegal());
+  @Override
+  @Transactional
+  public String getToken(LoginRequest loginRequest) {
+
+    if (this.isIllegalMail(loginRequest.getUsernameOrEmail())) {
+      return "Email is illegal to login. Your email is banned.";
     }
+
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(),
+            loginRequest.getPassword()));
+
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    return jwtTokenProvider.generateToken(authentication);
+
+  }
+
+  private boolean isIllegalMail(String email) {
+    MailCheckerResponse mailCheckerResponse = mailClient.isIllegal(email);
+    return Boolean.TRUE.equals(mailCheckerResponse.isIllegal());
+  }
 }

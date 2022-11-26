@@ -6,7 +6,7 @@ spring:
   cloud:
     gateway:
       routes:
-        - id : BLOGAPP
+        - id: BLOGAPP
           uri: lb://BLOGAPP
           predicates:
             - Path=/api/v1/**

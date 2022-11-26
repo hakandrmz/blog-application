@@ -14,30 +14,30 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 public class RabbitMQConfig {
 
-    private final ConnectionFactory connectionFactory;
+  private final ConnectionFactory connectionFactory;
 
-    @Bean
-    public AmqpTemplate amqpTemplate() {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(jacksonConverter());
-        return rabbitTemplate;
-    }
+  @Bean
+  public AmqpTemplate amqpTemplate() {
+    RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+    rabbitTemplate.setMessageConverter(jacksonConverter());
+    return rabbitTemplate;
+  }
 
-    @Bean
-    public SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory() {
-        SimpleRabbitListenerContainerFactory factory =
-                new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(jacksonConverter());
-        return factory;
-    }
+  @Bean
+  public SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory() {
+    SimpleRabbitListenerContainerFactory factory =
+        new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(jacksonConverter());
+    return factory;
+  }
 
-    @Bean
-    public MessageConverter jacksonConverter() {
-        MessageConverter messageConverter =
-                new Jackson2JsonMessageConverter();
-        return messageConverter;
-    }
+  @Bean
+  public MessageConverter jacksonConverter() {
+    MessageConverter messageConverter =
+        new Jackson2JsonMessageConverter();
+    return messageConverter;
+  }
 }
 
 

@@ -17,22 +17,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private AuthService authService;
+  private AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+  public AuthController(AuthService authService) {
+    this.authService = authService;
+  }
 
-    @PostMapping("/signin")
-    public ResponseEntity<JwtAuthResponse> authenticateUser(@RequestBody LoginRequest loginRequest){
-        String responseToken = authService.getToken(loginRequest);
-        return ResponseEntity.ok(new JwtAuthResponse(responseToken));
-    }
+  @PostMapping("/signin")
+  public ResponseEntity<JwtAuthResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+    String responseToken = authService.getToken(loginRequest);
+    return ResponseEntity.ok(new JwtAuthResponse(responseToken));
+  }
 
-    @PostMapping("/signup")
-    public ResponseEntity<String> registerUser(@RequestBody SignupRequest signupRequest){
-        return new ResponseEntity<>(authService.registerUser(signupRequest),HttpStatus.OK);
-    }
+  @PostMapping("/signup")
+  public ResponseEntity<String> registerUser(@RequestBody SignupRequest signupRequest) {
+    return new ResponseEntity<>(authService.registerUser(signupRequest), HttpStatus.OK);
+  }
 }
 
 
