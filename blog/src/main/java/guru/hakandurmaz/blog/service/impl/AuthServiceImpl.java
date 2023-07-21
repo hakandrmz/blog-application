@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private final MailClient mailClient;
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
   private final AuthenticationManager authenticationManager;
@@ -42,18 +41,17 @@ public class AuthServiceImpl implements AuthService {
       return "Username is already taken!";
     } else if (Boolean.TRUE.equals(userRepository.existsByEmail(signupRequest.getEmail()))) {
       return "Email is already taken!";
-    } else if (this.isIllegalMail(signupRequest.getEmail())) {
-      return "Email is illegal to register";
     } else {
-      //crete user object
       User user = new User();
       user.setEmail(signupRequest.getEmail());
       user.setUsername(signupRequest.getUsername());
       user.setName(signupRequest.getName());
       user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
 
-      Role roles = roleRepository.findByName("ROLE_USER")
-          .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Bulunamadı."));
+      Role roles =
+          roleRepository
+              .findByName("ROLE_USER")
+              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Not found."));
       user.setRoles(Collections.singleton(roles));
 
       userRepository.saveAndFlush(user);
@@ -74,22 +72,13 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public String getToken(LoginRequest loginRequest) {
 
-    if (this.isIllegalMail(loginRequest.getUsernameOrEmail())) {
-      return "Email is illegal to login. Your email is banned.";
-    }
-
-    Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(),
-            loginRequest.getPassword()));
+    Authentication authentication =
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     return jwtTokenProvider.generateToken(authentication);
-
-  }
-
-  private boolean isIllegalMail(String email) {
-    MailCheckerResponse mailCheckerResponse = mailClient.isIllegal(email);
-    return Boolean.TRUE.equals(mailCheckerResponse.isIllegal());
   }
 }

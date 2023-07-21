@@ -1,13 +1,13 @@
 package guru.hakandurmaz.blog.security;
 
 import guru.hakandurmaz.blog.exception.BlogAPIException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import java.security.Key;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,10 +19,10 @@ public class JwtTokenProvider {
 
   @Value("${app.jwt-secret}")
   private String jwtSecret;
+
   @Value("${app.jwt-expiration-milliseconds}")
   private int jwtExpirationMilliseconds;
 
-  //generate token
   public String generateToken(Authentication authentication) {
 
     String username = authentication.getName();
@@ -33,32 +33,32 @@ public class JwtTokenProvider {
         .setSubject(username)
         .setIssuedAt(new Date())
         .setExpiration(expireDate)
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
+        .signWith(key(), SignatureAlgorithm.HS256)
         .compact();
   }
 
-  //get username for token
-  public String getUsernameFromJWT(String token) {
-
-    Claims claims = Jwts.parser()
-        .setSigningKey(jwtSecret)
-        .parseClaimsJws(token)
-        .getBody();
-    return claims.getSubject();
-
+  private Key key() {
+    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
   }
 
-  //validate token
+  // get username for token
+  public String getUsernameFromJWT(String token) {
+
+    return Jwts.parserBuilder()
+        .setSigningKey(key())
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .getSubject();
+  }
+
+  // validate token
   public boolean validateToken(String token) {
 
     try {
-      Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+      Jwts.parserBuilder().setSigningKey(key()).build().parse(token);
       return true;
-    } catch (SignatureException ex) {
-      throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT signature.");
     } catch (MalformedJwtException ex) {
-      throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT token.");
-    } catch (ExpiredJwtException ex) {
       throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT token.");
     } catch (UnsupportedJwtException ex) {
       throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Unsupported JWT signature.");
@@ -66,26 +66,4 @@ public class JwtTokenProvider {
       throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT signature.");
     }
   }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

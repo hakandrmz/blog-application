@@ -4,14 +4,14 @@ logging:
       springframework:
         security: debug
 app:
-  jwt-expiration-milliseconds: '604800000'
-  jwt-secret: jwtsecretkey
+  jwt-expiration-milliseconds: 86400000
+  jwt-secret: jlPSXaNvz1f6gRELt6s64sH2SygfY1TQWNwZbxncSwfwQpezmZdkCcHoCMwCFKKj
 spring:
   application:
     name: blogapp
   datasource:
     username: hdurmaz
-    url: jdbc:postgresql://localhost:5432/blogapp
+    url: jdbc:postgresql://localhost:5432/hdurmaz
     password: hdurmaz
   jpa:
     properties:
@@ -24,8 +24,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  zipkin:
-    base-url: http://localhost:9411
   rabbitmq:
     addresses: localhost:5672
 server:
@@ -46,3 +44,15 @@ management:
       show-details: always
     shutdown:
       enabled: true
+springdoc:
+  swagger-ui:
+    operationsSorter: method
+    filter: 'false'
+    syntaxHighlight:
+      activated: 'true'
+    enabled: 'true'
+    tryItOutEnabled: 'false'
+    path: v3/api-docs/swagger-ui.html
+api:
+  version: 1.0
+  description: Role based auth with Spring Boot 3.1.1

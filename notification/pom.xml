@@ -26,14 +26,6 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <artifactId>spring-cloud-starter-sleuth</artifactId>
-      <groupId>org.springframework.cloud</groupId>
-    </dependency>
-    <dependency>
-      <artifactId>spring-cloud-sleuth-zipkin</artifactId>
-      <groupId>org.springframework.cloud</groupId>
-    </dependency>
-    <dependency>
       <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
       <groupId>org.springframework.cloud</groupId>
     </dependency>

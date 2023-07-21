@@ -3,15 +3,16 @@ package guru.hakandurmaz.blog.config;
 import guru.hakandurmaz.blog.security.CustomUserDetailsService;
 import guru.hakandurmaz.blog.security.JwtAuthenticationEntryPoint;
 import guru.hakandurmaz.blog.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,15 +20,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-  @Autowired
-  private CustomUserDetailsService userDetailsService;
+  private final CustomUserDetailsService userDetailsService;
 
-  @Autowired
-  private JwtAuthenticationEntryPoint authenticationEntryPoint;
+  private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -40,64 +39,36 @@ public class SecurityConfig {
   }
 
   @Bean
+  public DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(userDetailsService);
+    authProvider.setPasswordEncoder(passwordEncoder());
+    return authProvider;
+  }
+
+  @Bean
   protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf().disable()
-        .exceptionHandling()
-        .authenticationEntryPoint(authenticationEntryPoint)
-        .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .authorizeRequests((authorize) -> authorize
-            .antMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
-            .antMatchers("/api/v1/auth/**").permitAll()
-            .antMatchers("/v2/api-docs/**").permitAll()
-            .antMatchers("/swagger-ui/**").permitAll()
-            .antMatchers("/swagger-resources/**").permitAll()
-            .antMatchers("/swagger-ui.html").permitAll()
-            .antMatchers("/webjars/**").permitAll()
-            .anyRequest()
-            .authenticated()
-        );
+    http.csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(
+            exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            (authorize) ->
+                authorize
+                    .requestMatchers(HttpMethod.GET, "/api/v1/**")
+                    .permitAll()
+                    .requestMatchers("/api/v1/auth/**")
+                    .permitAll()
+                    .requestMatchers("/v3/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated());
+    http.authenticationProvider(authenticationProvider());
+
     http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
-
-/*  DEPRECATED
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/v1/**").permitAll()
-
-                .antMatchers("/api/v1/auth/**").permitAll()
-                .antMatchers("/actuator/**").permitAll()
-                .antMatchers("/v2/api-docs/**").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/swagger-ui.html").permitAll()
-                .antMatchers("/webjars/posts/comments/**").permitAll()
-                .anyRequest()
-                .authenticated();
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).
-                passwordEncoder(passwordEncoder());
-    }
-    */
 
   @Bean
   public AuthenticationManager authenticationManager(

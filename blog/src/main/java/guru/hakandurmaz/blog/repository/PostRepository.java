@@ -11,9 +11,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   boolean existsById(Long id);
 
-  @Query("SELECT p FROM Post p WHERE " +
-      "p.title = ?1" +
-      "Or p.description = ?1")
+  @Query("SELECT p FROM Post p WHERE " + "p.title = ?1" + "Or p.description = ?1")
   List<Post> searchPosts(String query);
-
 }
