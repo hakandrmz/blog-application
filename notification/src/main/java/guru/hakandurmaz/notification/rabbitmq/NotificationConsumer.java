@@ -1,6 +1,6 @@
 package guru.hakandurmaz.notification.rabbitmq;
 
-import guru.hakandurmaz.clients.notification.NotificationRequest;
+import guru.hakandurmaz.notification.NotificationRequest;
 import guru.hakandurmaz.notification.NotificationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

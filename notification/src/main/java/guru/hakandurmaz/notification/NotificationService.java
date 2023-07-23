@@ -1,6 +1,5 @@
 package guru.hakandurmaz.notification;
 
-import guru.hakandurmaz.clients.notification.NotificationRequest;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ public class NotificationService {
             .sender("Hakan Durmaz")
             .message(notificationRequest.message())
             .sentAt(LocalDateTime.now())
-            .build()
-    );
+            .build());
   }
 }

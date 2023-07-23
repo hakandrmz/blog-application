@@ -1,6 +1,5 @@
 package guru.hakandurmaz.notification;
 
-import guru.hakandurmaz.clients.notification.NotificationRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

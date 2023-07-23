@@ -9,13 +9,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="notification" />
         <module name="apigw" />
-        <module name="clients" />
-        <module name="amqp" />
         <module name="blog" />
         <module name="eureka-server" />
+        <module name="amqp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="clients" target="17" />
       <module name="mailchecker" target="17" />
     </bytecodeTargetLevel>
   </component>
