@@ -10,8 +10,6 @@ import guru.hakandurmaz.blog.repository.RoleRepository;
 import guru.hakandurmaz.blog.repository.UserRepository;
 import guru.hakandurmaz.blog.security.JwtTokenProvider;
 import guru.hakandurmaz.blog.service.AuthService;
-import guru.hakandurmaz.clients.emailcheck.MailCheckerResponse;
-import guru.hakandurmaz.clients.emailcheck.MailClient;
 import guru.hakandurmaz.clients.notification.NotificationRequest;
 import java.util.Collections;
 import lombok.AllArgsConstructor;
@@ -56,14 +54,12 @@ public class AuthServiceImpl implements AuthService {
 
       userRepository.saveAndFlush(user);
 
-      NotificationRequest notificationRequest = new NotificationRequest(user.getId(),
-          user.getEmail(), "Welcome to my blog" + user.getName()
+      NotificationRequest notificationRequest =
+          new NotificationRequest(
+              user.getId(), user.getEmail(), "Welcome to my blog" + user.getName());
 
-      );
-
-      rabbitMQMessageProducer.publish(notificationRequest, "internal.exchange",
-          "internal.notification.routing-key");
-
+      rabbitMQMessageProducer.publish(
+          notificationRequest, "internal.exchange", "internal.notification.routing-key");
     }
     return "User registered";
   }

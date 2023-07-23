@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.payload.post;
 
+import java.time.Instant;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,4 +21,7 @@ public class GetPostDto {
   private long totalElements;
   private int totalPages;
   private boolean last;
+  private Instant createdOn;
+  private Instant lastUpdatedOn;
+  private String updatedBy;
 }

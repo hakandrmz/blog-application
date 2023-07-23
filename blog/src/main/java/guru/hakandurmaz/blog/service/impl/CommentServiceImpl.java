@@ -2,6 +2,8 @@ package guru.hakandurmaz.blog.service.impl;
 
 import guru.hakandurmaz.blog.entity.Comment;
 import guru.hakandurmaz.blog.entity.Post;
+import guru.hakandurmaz.blog.entity.User;
+import guru.hakandurmaz.blog.exception.BlogAPIUnauthorizedException;
 import guru.hakandurmaz.blog.exception.ResourceNotFoundException;
 import guru.hakandurmaz.blog.payload.comment.CreateCommentRequest;
 import guru.hakandurmaz.blog.payload.comment.GetCommentDto;
@@ -9,6 +11,7 @@ import guru.hakandurmaz.blog.payload.comment.UpdateCommentRequest;
 import guru.hakandurmaz.blog.repository.CommentRepository;
 import guru.hakandurmaz.blog.repository.PostRepository;
 import guru.hakandurmaz.blog.service.CommentService;
+import guru.hakandurmaz.blog.service.UserService;
 import guru.hakandurmaz.blog.utils.mappers.ModelMapperService;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.ErrorDataResult;
@@ -19,6 +22,7 @@ import guru.hakandurmaz.blog.utils.results.SuccessResult;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,22 +31,28 @@ public class CommentServiceImpl implements CommentService {
   private final CommentRepository commentRepository;
   private final PostRepository postRepository;
   private final ModelMapperService modelMapperService;
+  private final UserService userService;
 
   public CommentServiceImpl(
       ModelMapperService modelMapperService,
       CommentRepository commentRepository,
-      PostRepository postRepository) {
+      PostRepository postRepository,
+      UserService userService) {
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
     this.modelMapperService = modelMapperService;
+    this.userService = userService;
   }
 
   @Override
-  public Result createComment(long postId, CreateCommentRequest commentRequest) {
+  public Result createComment(long postId, CreateCommentRequest commentRequest, String username) {
     Optional<Post> post = postRepository.findById(postId);
+
     if (post.isPresent()) {
+      User user = userService.getUserByUserName(username);
       Comment comment = this.modelMapperService.forRequest().map(commentRequest, Comment.class);
       comment.setPost(post.get());
+      comment.setUser(user);
       commentRepository.save(comment);
       return new SuccessResult("Comment saved.");
     } else {
@@ -78,28 +88,35 @@ public class CommentServiceImpl implements CommentService {
   }
 
   @Override
-  public Result updateComment(UpdateCommentRequest commentRequest) {
-    Comment comment =
-        commentRepository
-            .findById(commentRequest.getId())
-            .orElseThrow(
-                () -> new ResourceNotFoundException("Comment", "id", commentRequest.getId()));
+  public Result updateComment(UpdateCommentRequest commentRequest, String username) {
+    Comment comment = checkCommentAuthentication(commentRequest.getId(), username);
 
     comment.setName(commentRequest.getName());
-    comment.setEmail(commentRequest.getEmail());
     comment.setBody(commentRequest.getBody());
+    comment.setUpdatedBy(username);
     commentRepository.save(comment);
 
-    return new SuccessResult("Yorum güncellendi");
+    return new SuccessResult("Updated comment.");
   }
 
   @Override
-  public Result deleteComment(Long commentId) {
+  public Result deleteComment(Long commentId, String username) {
     if (commentRepository.existsById(commentId)) {
       commentRepository.deleteById(commentId);
       return new SuccessResult("Comment is deleted");
     } else {
       return new ErrorResult("Comment is not exist");
     }
+  }
+
+  private Comment checkCommentAuthentication(long id, String username) {
+    Comment comment =
+        commentRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
+    if (!StringUtils.equals(comment.getUser().getUsername(), username)) {
+      throw new BlogAPIUnauthorizedException("You dont have permission.");
+    }
+    return comment;
   }
 }

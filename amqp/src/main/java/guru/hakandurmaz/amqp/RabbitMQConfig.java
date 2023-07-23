@@ -1,6 +1,6 @@
 package guru.hakandurmaz.amqp;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RabbitMQConfig {
 
   private final ConnectionFactory connectionFactory;
@@ -25,8 +25,7 @@ public class RabbitMQConfig {
 
   @Bean
   public SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory() {
-    SimpleRabbitListenerContainerFactory factory =
-        new SimpleRabbitListenerContainerFactory();
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
     factory.setMessageConverter(jacksonConverter());
     return factory;
@@ -34,17 +33,6 @@ public class RabbitMQConfig {
 
   @Bean
   public MessageConverter jacksonConverter() {
-    MessageConverter messageConverter =
-        new Jackson2JsonMessageConverter();
-    return messageConverter;
+    return new Jackson2JsonMessageConverter();
   }
 }
-
-
-
-
-
-
-
-
-

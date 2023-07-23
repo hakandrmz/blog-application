@@ -1,6 +1,8 @@
 package guru.hakandurmaz.blog.service.impl;
 
 import guru.hakandurmaz.blog.entity.Post;
+import guru.hakandurmaz.blog.entity.User;
+import guru.hakandurmaz.blog.exception.BlogAPIUnauthorizedException;
 import guru.hakandurmaz.blog.exception.ResourceNotFoundException;
 import guru.hakandurmaz.blog.payload.post.CreatePostRequest;
 import guru.hakandurmaz.blog.payload.post.GetPostByIdDto;
@@ -9,6 +11,7 @@ import guru.hakandurmaz.blog.payload.post.PostRequest;
 import guru.hakandurmaz.blog.payload.post.UpdatePostRequest;
 import guru.hakandurmaz.blog.repository.PostRepository;
 import guru.hakandurmaz.blog.service.PostService;
+import guru.hakandurmaz.blog.service.UserService;
 import guru.hakandurmaz.blog.utils.mappers.ModelMapperService;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.ErrorResult;
@@ -18,6 +21,7 @@ import guru.hakandurmaz.blog.utils.results.SuccessResult;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,20 +33,27 @@ import org.springframework.stereotype.Service;
 public class PostServiceImpl implements PostService {
 
   private final PostRepository postRepository;
+  private final UserService userService;
   private final ModelMapperService modelMapperService;
 
-  public PostServiceImpl(PostRepository postRepository, ModelMapperService modelMapperService) {
+  public PostServiceImpl(
+      PostRepository postRepository,
+      UserService userService,
+      ModelMapperService modelMapperService) {
     this.postRepository = postRepository;
+    this.userService = userService;
     this.modelMapperService = modelMapperService;
   }
 
   @Override
-  public Result createPost(CreatePostRequest createPostRequest) {
+  public Result createPost(CreatePostRequest createPostRequest, String username) {
 
-    if (postRepository.existsByTitle(createPostRequest.getTitle())) {
+    if (postRepository.existsByTitleAndUser_Username(createPostRequest.getTitle(), username)) {
       return new ErrorResult("This title is exist");
     } else {
       Post post = this.modelMapperService.forRequest().map(createPostRequest, Post.class);
+      User user = userService.getUserByEmail(username);
+      post.setUser(user);
       this.postRepository.save(post);
       return new SuccessResult("Post is published");
     }
@@ -50,22 +61,25 @@ public class PostServiceImpl implements PostService {
 
   @Override
   public DataResult<GetPostDto> getAllPosts(
-      int pageNo, int pageSize, String sortBy, String sortDir) {
-
+      String username, int pageNo, int pageSize, String sortBy, String sortDir) {
     Sort sort =
         sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
             ? Sort.by(sortBy).ascending()
             : Sort.by(sortBy).descending();
 
     Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-    Page<Post> posts = postRepository.findAll(pageable);
-    GetPostDto response = this.configureResponse(posts);
 
+    Page<Post> posts =
+        StringUtils.isNotBlank(username)
+            ? postRepository.findAllByUser_Username(username, pageable)
+            : postRepository.findAll(pageable);
+
+    GetPostDto response = this.configureResponse(posts);
     return new SuccessDataResult<>(response);
   }
 
   @Override
-  public DataResult getPostById(long id) {
+  public DataResult<GetPostByIdDto> getPostById(long id) {
 
     Post post =
         postRepository
@@ -75,27 +89,21 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public Result updatePost(UpdatePostRequest postRequest) {
-
-    Post post =
-        postRepository
-            .findById(postRequest.getId())
-            .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postRequest.getId()));
+  public Result updatePost(UpdatePostRequest postRequest, String username) {
+    Post post = checkPostAuthentication(postRequest.getId(), username);
     post.setDescription(postRequest.getDescription());
     post.setContent(postRequest.getContent());
     post.setTitle(postRequest.getTitle());
+    post.setUpdatedBy(username);
     postRepository.save(post);
     return new SuccessResult("Post is updated");
   }
 
   @Override
-  public Result deletePostById(long id) {
-    if (postRepository.existsById(id)) {
-      postRepository.deleteById(id);
-      return new SuccessResult("Post is deleted");
-    } else {
-      return new ErrorResult("This post is not found");
-    }
+  public Result deletePostById(long id, String username) {
+    checkPostAuthentication(id, username);
+    postRepository.deleteById(id);
+    return new SuccessResult("Post is deleted");
   }
 
   @Override
@@ -118,5 +126,16 @@ public class PostServiceImpl implements PostService {
     getPostDto.setTotalPages(posts.getTotalPages());
     getPostDto.setLast(posts.isLast());
     return getPostDto;
+  }
+
+  private Post checkPostAuthentication(Long id, String username) {
+    Post post =
+        postRepository
+            .findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+    if (!StringUtils.equals(post.getUser().getUsername(), username)) {
+      throw new BlogAPIUnauthorizedException("You dont have permission.");
+    }
+    return post;
   }
 }

@@ -19,4 +19,5 @@ public class UpdatePostRequest {
   private String description;
 
   @NotEmpty private String content;
+
 }

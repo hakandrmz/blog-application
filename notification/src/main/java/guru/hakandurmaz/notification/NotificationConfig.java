@@ -30,9 +30,9 @@ public class NotificationConfig {
     return new Queue(this.notificationQueue);
   }
 
+  @Bean
   public Binding internalToNotification() {
-    return BindingBuilder
-        .bind(notificationQueue())
+    return BindingBuilder.bind(notificationQueue())
         .to(internalTopicExchange())
         .with(this.internalNotificationRoutingKey);
   }
@@ -48,5 +48,4 @@ public class NotificationConfig {
   public String getInternalNotificationRoutingKey() {
     return internalNotificationRoutingKey;
   }
-
 }

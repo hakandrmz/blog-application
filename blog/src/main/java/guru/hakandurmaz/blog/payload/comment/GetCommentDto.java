@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,4 +15,7 @@ public class GetCommentDto {
   private String name;
   private String email;
   private String body;
+  private Instant createdOn;
+  private Instant lastUpdatedOn;
+  private String updatedBy;
 }

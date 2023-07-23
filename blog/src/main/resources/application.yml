@@ -26,6 +26,9 @@ spring:
     show-sql: true
   rabbitmq:
     addresses: localhost:5672
+    username: guest
+    password: guest
+
 server:
   port: 8080
 eureka:

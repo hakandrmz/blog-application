@@ -28,36 +28,6 @@ services:
       - eureka-server
       - postgres
       - rabbitmq
-  mailchecker:
-    image: hdurmaz/mailchecker:latest
-    container_name: mailchecker
-    ports:
-      - "8081:8081"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - spring
-      - postgres
-    depends_on:
-      - zipkin
-      - eureka-server
-      - postgres
-      - rabbitmq
-  notification:
-    image: hdurmaz/notification:latest
-    container_name: notification
-    ports:
-      - "8082:8082"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    networks:
-      - spring
-      - postgres
-    depends_on:
-      - zipkin
-      - eureka-server
-      - postgres
-      - rabbitmq
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -72,16 +42,12 @@ services:
     networks:
       - postgres
     restart: unless-stopped
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
-    ports:
-      - "9411:9411"
-    networks:
-      - spring
   rabbitmq:
     image: rabbitmq:3.9.11-management-alpine
     container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     ports:
       - "5672:5672"
       - "15672:15672"

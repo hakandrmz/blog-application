@@ -9,7 +9,6 @@
     <modules>
         <module>blog</module>
         <module>eureka-server</module>
-        <module>clients</module>
         <module>notification</module>
         <module>apigw</module>
         <module>amqp</module>

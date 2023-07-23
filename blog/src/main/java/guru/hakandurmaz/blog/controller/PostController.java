@@ -1,6 +1,7 @@
 package guru.hakandurmaz.blog.controller;
 
 import guru.hakandurmaz.blog.payload.post.CreatePostRequest;
+import guru.hakandurmaz.blog.payload.post.GetPostByIdDto;
 import guru.hakandurmaz.blog.payload.post.GetPostDto;
 import guru.hakandurmaz.blog.payload.post.UpdatePostRequest;
 import guru.hakandurmaz.blog.service.PostService;
@@ -10,6 +11,7 @@ import guru.hakandurmaz.blog.utils.results.Result;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/posts")
+@RequestMapping("api/posts")
 public class PostController {
 
   private final PostService postService;
@@ -31,14 +33,17 @@ public class PostController {
     this.postService = postService;
   }
 
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PostMapping
-  public Result createPost(@Valid @RequestBody CreatePostRequest postRequest) {
-    return this.postService.createPost(postRequest);
+  public Result createPost(
+      @Valid @RequestBody CreatePostRequest postRequest, Authentication authentication) {
+    String username = authentication.getName();
+    return this.postService.createPost(postRequest, username);
   }
 
-  @GetMapping
-  public DataResult<GetPostDto> getAllPosts(
+  @GetMapping("/username")
+  public DataResult<GetPostDto> getAllPostsByUsername(
+      @RequestParam(name = "username", required = false) String username,
       @RequestParam(
               value = "pageNo",
               defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
@@ -56,25 +61,27 @@ public class PostController {
               defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
               required = false)
           String sortDir) {
-    log.info(postService.getAllPosts(pageNo, pageSize, sortBy, sortDir).toString());
-    return this.postService.getAllPosts(pageNo, pageSize, sortBy, sortDir);
+    return this.postService.getAllPosts(username, pageNo, pageSize, sortBy, sortDir);
   }
 
   @GetMapping(value = "{id}")
-  public DataResult<GetPostDto> getPostById(@PathVariable(name = "id") long id) {
+  public DataResult<GetPostByIdDto> getPostById(@PathVariable(name = "id") long id) {
     return postService.getPostById(id);
   }
 
-  @PreAuthorize("hasRole('ADMIN')")
-  @PutMapping("{id}")
-  public Result updatePost(@Valid @RequestBody UpdatePostRequest postRequest) {
-    return postService.updatePost(postRequest);
+  @PreAuthorize("hasAnyRole('ADMIN','USER')")
+  @PutMapping
+  public Result updatePost(
+      @Valid @RequestBody UpdatePostRequest postRequest, Authentication authentication) {
+    String username = authentication.getName();
+    return postService.updatePost(postRequest, username);
   }
 
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @DeleteMapping("{id}")
-  public Result deletePost(@PathVariable(name = "id") long id) {
-    return postService.deletePostById(id);
+  public Result deletePost(@PathVariable(name = "id") long id, Authentication authentication) {
+    String username = authentication.getName();
+    return postService.deletePostById(id, username);
   }
 
   @GetMapping({"/search"})
