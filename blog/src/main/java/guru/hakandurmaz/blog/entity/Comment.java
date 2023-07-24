@@ -1,19 +1,17 @@
 package guru.hakandurmaz.blog.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-@Data
+@EqualsAndHashCode(callSuper = true)
+@Table(name = "comments")
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "comments")
+@Data
 public class Comment extends AbstractEntity {
 
   @Id
