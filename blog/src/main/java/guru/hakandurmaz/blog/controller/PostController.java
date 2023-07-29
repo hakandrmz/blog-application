@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("api/posts")
 public class PostController {
 
   private final PostService postService;
