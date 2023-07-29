@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,11 +40,20 @@ public class JwtTokenProvider {
         .compact();
   }
 
+  private String buildToken(Map<String, Object> extraClaims, User user, long expiration) {
+    return Jwts.builder()
+            .setClaims(extraClaims)
+            .setSubject(user.getEmail())
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(key(), SignatureAlgorithm.HS256)
+            .compact();
+  }
+
   private Key key() {
     return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
   }
 
-  // get username for token
   public String extractUsername(String token) {
 
     return Jwts.parserBuilder()
@@ -55,8 +63,7 @@ public class JwtTokenProvider {
         .getBody()
         .getSubject();
   }
-
-  // validate token
+  
   public boolean validateToken(String token) {
 
     try {
@@ -93,17 +100,9 @@ public class JwtTokenProvider {
     return Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(token).getBody();
   }
 
-  public String generateRefreshToken(User userDetails) {
-    return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+  public String generateRefreshToken(User user) {
+    return buildToken(new HashMap<>(), user, refreshExpiration);
   }
 
-  private String buildToken(Map<String, Object> extraClaims, User userDetails, long expiration) {
-    return Jwts.builder()
-        .setClaims(extraClaims)
-        .setSubject(userDetails.getEmail())
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + expiration))
-        .signWith(key(), SignatureAlgorithm.HS256)
-        .compact();
-  }
+
 }

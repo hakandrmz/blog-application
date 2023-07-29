@@ -14,10 +14,6 @@ import org.hibernate.annotations.OnDeleteAction;
 @Data
 public class Comment extends AbstractEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id;
-
   private String name;
   private String body;
 
