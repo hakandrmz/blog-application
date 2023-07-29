@@ -1,14 +1,15 @@
 package guru.hakandurmaz.blog.security;
 
+import guru.hakandurmaz.blog.entity.User;
 import guru.hakandurmaz.blog.exception.BlogAPIException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -23,9 +24,12 @@ public class JwtTokenProvider {
   @Value("${app.jwt-expiration-milliseconds}")
   private long jwtExpirationMilliseconds;
 
-  public String generateToken(Authentication authentication) {
+  @Value("${app.jwt-refresh-token.expiration}")
+  private long refreshExpiration;
 
-    String username = authentication.getName();
+  public String generateToken(User user) {
+
+    String username = user.getEmail();
     Date currentDate = new Date();
     Date expireDate = new Date(currentDate.getTime() + jwtExpirationMilliseconds);
 
@@ -42,7 +46,7 @@ public class JwtTokenProvider {
   }
 
   // get username for token
-  public String getUsernameFromJWT(String token) {
+  public String extractUsername(String token) {
 
     return Jwts.parserBuilder()
         .setSigningKey(key())
@@ -65,5 +69,41 @@ public class JwtTokenProvider {
     } catch (IllegalArgumentException ex) {
       throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT signature.");
     }
+  }
+
+  public boolean isTokenValid(String token, User userDetails) {
+    final String username = extractUsername(token);
+    return (username.equals(userDetails.getEmail())) && !isTokenExpired(token);
+  }
+
+  private boolean isTokenExpired(String token) {
+    return extractExpiration(token).before(new Date());
+  }
+
+  private Date extractExpiration(String token) {
+    return extractClaim(token, Claims::getExpiration);
+  }
+
+  public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    final Claims claims = extractAllClaims(token);
+    return claimsResolver.apply(claims);
+  }
+
+  private Claims extractAllClaims(String token) {
+    return Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(token).getBody();
+  }
+
+  public String generateRefreshToken(User userDetails) {
+    return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+  }
+
+  private String buildToken(Map<String, Object> extraClaims, User userDetails, long expiration) {
+    return Jwts.builder()
+        .setClaims(extraClaims)
+        .setSubject(userDetails.getEmail())
+        .setIssuedAt(new Date(System.currentTimeMillis()))
+        .setExpiration(new Date(System.currentTimeMillis() + expiration))
+        .signWith(key(), SignatureAlgorithm.HS256)
+        .compact();
   }
 }

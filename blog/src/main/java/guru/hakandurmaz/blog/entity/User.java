@@ -1,11 +1,16 @@
 package guru.hakandurmaz.blog.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 import java.util.Set;
-import lombok.Data;
+import lombok.*;
 
-@Data
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(
     name = "users",
     uniqueConstraints = {
@@ -19,10 +24,14 @@ public class User extends AbstractEntity {
   private String email;
   private String password;
 
+  @OneToMany(mappedBy = "user")
+  private List<Token> tokens;
+
   @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinTable(
       name = "user_roles",
       joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
+  
 }

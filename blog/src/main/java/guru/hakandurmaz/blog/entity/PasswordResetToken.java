@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import java.util.Date;
 import lombok.*;
 
-@Table(name = "password_reset_tokens")
-@EqualsAndHashCode(callSuper = true)
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
 @Entity
 @Getter
+@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
+@EqualsAndHashCode(callSuper = true)
+@Table(name = "password_reset_tokens")
 public class PasswordResetToken extends AbstractEntity {
 
   private final String token;

@@ -1,30 +1,30 @@
 package guru.hakandurmaz.blog.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.hakandurmaz.amqp.RabbitMQMessageProducer;
 import guru.hakandurmaz.blog.entity.PasswordResetToken;
 import guru.hakandurmaz.blog.entity.Role;
+import guru.hakandurmaz.blog.entity.Token;
 import guru.hakandurmaz.blog.entity.User;
 import guru.hakandurmaz.blog.exception.BlogAPIException;
 import guru.hakandurmaz.blog.payload.notification.NotificationRequest;
-import guru.hakandurmaz.blog.payload.security.LoginRequest;
-import guru.hakandurmaz.blog.payload.security.PasswordDto;
-import guru.hakandurmaz.blog.payload.security.SignupRequest;
+import guru.hakandurmaz.blog.payload.security.*;
 import guru.hakandurmaz.blog.repository.PasswordTokenRepository;
 import guru.hakandurmaz.blog.repository.RoleRepository;
+import guru.hakandurmaz.blog.repository.TokenRepository;
 import guru.hakandurmaz.blog.repository.UserRepository;
 import guru.hakandurmaz.blog.security.JwtTokenProvider;
 import guru.hakandurmaz.blog.service.AuthService;
 import guru.hakandurmaz.blog.service.UserService;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
 
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
+  private final TokenRepository tokenRepository;
   private final AuthenticationManager authenticationManager;
   private final PasswordTokenRepository passwordTokenRepository;
   private final PasswordEncoder passwordEncoder;
@@ -44,48 +45,48 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public String registerUser(SignupRequest signupRequest) {
+  public AuthenticationResponse registerUser(SignupRequest signupRequest) {
     if (Boolean.TRUE.equals(userRepository.existsByUsername(signupRequest.getUsername()))) {
-      return "Username is already taken!";
+      throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Username is already taken!");
     } else if (Boolean.TRUE.equals(userRepository.existsByEmail(signupRequest.getEmail()))) {
-      return "Email is already taken!";
-    } else {
-      User user = new User();
-      user.setEmail(signupRequest.getEmail());
-      user.setUsername(signupRequest.getUsername());
-      user.setName(signupRequest.getName());
-      user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-
-      Role roles =
-          roleRepository
-              .findByName("ROLE_USER")
-              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Not found."));
-      user.setRoles(Collections.singleton(roles));
-
-      userRepository.saveAndFlush(user);
-
-      NotificationRequest notificationRequest =
-          new NotificationRequest(
-              user.getId(), user.getEmail(), "Welcome to my blog" + user.getName());
-
-      rabbitMQMessageProducer.publish(
-          notificationRequest, "internal.exchange", "internal.notification.routing-key");
+      throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Email is already taken!");
     }
-    return "User registered";
+    User user = generateUserFromRequest(signupRequest);
+
+    User savedUser = userRepository.save(user);
+    String accessToken = jwtTokenProvider.generateToken(user);
+    String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+    saveUserToken(savedUser, accessToken);
+
+    NotificationRequest notificationRequest =
+        new NotificationRequest(
+            user.getId(), user.getEmail(), "Welcome to my blog" + user.getName());
+
+    rabbitMQMessageProducer.publish(
+        notificationRequest, "internal.exchange", "internal.notification.routing-key");
+
+    return AuthenticationResponse.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .build();
   }
 
   @Override
   @Transactional
-  public String getToken(LoginRequest loginRequest) {
+  public AuthenticationResponse authenticate(LoginRequest request) {
 
-    Authentication authentication =
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
-
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-    return jwtTokenProvider.generateToken(authentication);
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            request.getUsernameOrEmail(), request.getPassword()));
+    var user = userRepository.findByEmail(request.getUsernameOrEmail()).orElseThrow();
+    var jwtToken = jwtTokenProvider.generateToken(user);
+    var refreshToken = jwtTokenProvider.generateRefreshToken(user);
+    revokeAllUserTokens(user);
+    saveUserToken(user, jwtToken);
+    return AuthenticationResponse.builder()
+        .accessToken(jwtToken)
+        .refreshToken(refreshToken)
+        .build();
   }
 
   @Override
@@ -136,5 +137,74 @@ public class AuthServiceImpl implements AuthService {
     calendar.setTime(new Date());
     calendar.add(Calendar.HOUR_OF_DAY, 1);
     return calendar.getTime();
+  }
+
+  public void refreshToken(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    final String refreshToken;
+    final String userEmail;
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      return;
+    }
+    refreshToken = authHeader.substring(7);
+    userEmail = jwtTokenProvider.extractUsername(refreshToken);
+    if (userEmail != null) {
+
+      User user =
+          userRepository
+              .findByEmail(userEmail)
+              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "User not found"));
+
+      if (jwtTokenProvider.isTokenValid(refreshToken, user)) {
+        var accessToken = jwtTokenProvider.generateToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, accessToken);
+        var authResponse =
+            AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+        new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+      }
+    }
+  }
+
+  private void revokeAllUserTokens(User user) {
+    var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+    if (validUserTokens.isEmpty()) return;
+    validUserTokens.forEach(
+        token -> {
+          token.setExpired(true);
+          token.setRevoked(true);
+        });
+    tokenRepository.saveAll(validUserTokens);
+  }
+
+  private void saveUserToken(User user, String jwtToken) {
+    var token =
+        Token.builder()
+            .user(user)
+            .token(jwtToken)
+            .tokenType(TokenType.BEARER)
+            .expired(false)
+            .revoked(false)
+            .build();
+    tokenRepository.save(token);
+  }
+
+  private User generateUserFromRequest(SignupRequest signupRequest) {
+    User user = new User();
+    user.setEmail(signupRequest.getEmail());
+    user.setUsername(signupRequest.getUsername());
+    user.setName(signupRequest.getName());
+    user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+
+    Role roles =
+        roleRepository
+            .findByName("ROLE_USER")
+            .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Not found."));
+    user.setRoles(Collections.singleton(roles));
+    return user;
   }
 }
