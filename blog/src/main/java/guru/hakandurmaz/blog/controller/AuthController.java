@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.controller;
 
+import guru.hakandurmaz.blog.config.LogPerformance;
 import guru.hakandurmaz.blog.payload.security.AuthenticationResponse;
 import guru.hakandurmaz.blog.payload.security.LoginRequest;
 import guru.hakandurmaz.blog.payload.security.PasswordDto;
@@ -24,26 +25,31 @@ public class AuthController {
     this.authService = authService;
   }
 
+  @LogPerformance
   @PostMapping("/sign-in")
   public ResponseEntity<AuthenticationResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
       return ResponseEntity.ok(authService.authenticate(loginRequest));
   }
 
+  @LogPerformance
   @PostMapping("/sign-up")
   public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody SignupRequest signupRequest) {
     return new ResponseEntity<>(authService.registerUser(signupRequest), HttpStatus.OK);
   }
 
+  @LogPerformance
   @PostMapping("/reset-password")
   public DataResult resetPassword(@RequestParam("email") String userEmail) {
     return new DataResult(authService.resetPassword(userEmail), true);
   }
 
+  @LogPerformance
   @PostMapping("/save-password")
   public Result savePassword(@RequestBody PasswordDto passwordDto) {
     return new SuccessDataResult(authService.updateUserPassword(passwordDto));
   }
 
+  @LogPerformance
   @PostMapping("/refresh-token")
   public void refreshToken(HttpServletRequest request, HttpServletResponse response)
       throws IOException {

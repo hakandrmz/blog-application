@@ -62,12 +62,7 @@ public class PostServiceImpl implements PostService {
   @Override
   public DataResult<GetPostDto> getAllPosts(
       String username, int pageNo, int pageSize, String sortBy, String sortDir) {
-    Sort sort =
-        sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
-            ? Sort.by(sortBy).ascending()
-            : Sort.by(sortBy).descending();
-
-    Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+    Pageable pageable = getPageable(pageNo, pageSize, sortBy, sortDir);
 
     Page<Post> posts =
         StringUtils.isNotBlank(username)
@@ -76,6 +71,16 @@ public class PostServiceImpl implements PostService {
 
     GetPostDto response = this.configureResponse(posts);
     return new SuccessDataResult<>(response);
+  }
+
+  private static Pageable getPageable(int pageNo, int pageSize, String sortBy, String sortDir) {
+    Sort sort =
+        sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+            ? Sort.by(sortBy).ascending()
+            : Sort.by(sortBy).descending();
+
+    return PageRequest.of(pageNo, pageSize, sort);
+
   }
 
   @Override
@@ -94,22 +99,23 @@ public class PostServiceImpl implements PostService {
     post.setDescription(postRequest.getDescription());
     post.setContent(postRequest.getContent());
     post.setTitle(postRequest.getTitle());
-    post.setUpdatedBy(username);
     postRepository.save(post);
-    return new SuccessResult("Post is updated");
+    return new SuccessResult("Post updated");
   }
 
   @Override
   public Result deletePostById(long id, String username) {
     checkPostAuthentication(id, username);
     postRepository.deleteById(id);
-    return new SuccessResult("Post is deleted");
+    return new SuccessResult("Post deleted");
   }
 
   @Override
-  public DataResult listOfPosts(String query) {
-    List<Post> searchPosts = postRepository.searchPosts(query);
-    return new SuccessDataResult(searchPosts);
+  public DataResult listOfPosts(String query, int pageNo, int pageSize, String sortBy, String sortDir) {
+    Pageable pageable = getPageable(pageNo, pageSize, sortBy, sortDir);
+    Page<Post> posts = postRepository.findByTitleContainingIgnoreCase(query, pageable);
+    GetPostDto response = this.configureResponse(posts);
+    return new SuccessDataResult(response);
   }
 
   private GetPostDto configureResponse(Page<Post> posts) {
@@ -133,7 +139,7 @@ public class PostServiceImpl implements PostService {
         postRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-    if (!StringUtils.equals(post.getUser().getUsername(), username)) {
+    if (!StringUtils.equals(post.getUser().getEmail(), username)) {
       throw new BlogAPIUnauthorizedException("You dont have permission.");
     }
     return post;

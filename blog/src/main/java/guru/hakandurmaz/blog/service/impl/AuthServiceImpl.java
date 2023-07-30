@@ -1,6 +1,7 @@
 package guru.hakandurmaz.blog.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.hakandurmaz.amqp.AmqpConstants;
 import guru.hakandurmaz.amqp.RabbitMQMessageProducer;
 import guru.hakandurmaz.blog.entity.PasswordResetToken;
 import guru.hakandurmaz.blog.entity.Role;
@@ -16,6 +17,7 @@ import guru.hakandurmaz.blog.repository.UserRepository;
 import guru.hakandurmaz.blog.security.JwtTokenProvider;
 import guru.hakandurmaz.blog.service.AuthService;
 import guru.hakandurmaz.blog.service.UserService;
+import guru.hakandurmaz.blog.utils.constants.AppConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+  
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
   private final TokenRepository tokenRepository;
@@ -47,9 +50,9 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public AuthenticationResponse registerUser(SignupRequest signupRequest) {
     if (Boolean.TRUE.equals(userRepository.existsByUsername(signupRequest.getUsername()))) {
-      throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Username is already taken!");
+      throw new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.USERNAME_ALREADY_EXIST);
     } else if (Boolean.TRUE.equals(userRepository.existsByEmail(signupRequest.getEmail()))) {
-      throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Email is already taken!");
+      throw new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.EMAIL_ALREADY_EXIST);
     }
     User user = generateUserFromRequest(signupRequest);
 
@@ -63,9 +66,10 @@ public class AuthServiceImpl implements AuthService {
             user.getId(), user.getEmail(), "Welcome to my blog" + user.getName());
 
     rabbitMQMessageProducer.publish(
-        notificationRequest, "internal.exchange", "internal.notification.routing-key");
+        notificationRequest, AmqpConstants.INTERNAL_EXCHANGE, AmqpConstants.INTERNAL_NOTIFICATION_ROUTING_KEY);
 
     return AuthenticationResponse.builder()
+            .tokenType(AppConstants.BEARER)
         .accessToken(accessToken)
         .refreshToken(refreshToken)
         .build();
@@ -120,14 +124,14 @@ public class AuthServiceImpl implements AuthService {
     final Calendar cal = Calendar.getInstance();
 
     if (passToken.getExpiryDate().before(cal.getTime()))
-      throw new BlogAPIException(HttpStatus.BAD_GATEWAY, "Token expired.");
+      throw new BlogAPIException(HttpStatus.BAD_GATEWAY, AppConstants.TOKEN_EXPIRED);
   }
 
   public PasswordResetToken validatePasswordResetToken(String token) {
     final PasswordResetToken passToken =
         passwordTokenRepository
             .findByToken(token)
-            .orElseThrow(() -> new BlogAPIException(HttpStatus.NOT_FOUND, "Token not found."));
+            .orElseThrow(() -> new BlogAPIException(HttpStatus.NOT_FOUND, AppConstants.TOKEN_NOT_FOUND));
     checkTokenDate(passToken);
     return passToken;
   }
@@ -144,7 +148,7 @@ public class AuthServiceImpl implements AuthService {
     final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
     final String refreshToken;
     final String userEmail;
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    if (authHeader == null || !authHeader.startsWith(AppConstants.BEARER_)) {
       return;
     }
     refreshToken = authHeader.substring(7);
@@ -154,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
       User user =
           userRepository
               .findByEmail(userEmail)
-              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "User not found"));
+              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.USER_NOT_FOUND));
 
       if (jwtTokenProvider.isTokenValid(refreshToken, user)) {
         var accessToken = jwtTokenProvider.generateToken(user);
@@ -202,8 +206,8 @@ public class AuthServiceImpl implements AuthService {
 
     Role roles =
         roleRepository
-            .findByName("ROLE_USER")
-            .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, "Role Not found."));
+            .findByName(AppConstants.ROLE_USER)
+            .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.ROLE_NOT_FOUND));
     user.setRoles(Collections.singleton(roles));
     return user;
   }

@@ -20,5 +20,5 @@ public interface PostService {
 
   Result deletePostById(long id, String username);
 
-  DataResult listOfPosts(String query);
+  DataResult listOfPosts(String query, int pageNo, int pageSize, String sortBy, String sortDir);
 }

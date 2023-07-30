@@ -93,7 +93,6 @@ public class CommentServiceImpl implements CommentService {
 
     comment.setName(commentRequest.getName());
     comment.setBody(commentRequest.getBody());
-    comment.setUpdatedBy(username);
     commentRepository.save(comment);
 
     return new SuccessResult("Updated comment.");
@@ -114,7 +113,7 @@ public class CommentServiceImpl implements CommentService {
         commentRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
-    if (!StringUtils.equals(comment.getUser().getUsername(), username)) {
+    if (!StringUtils.equals(comment.getUser().getEmail(), username)) {
       throw new BlogAPIUnauthorizedException("You dont have permission.");
     }
     return comment;

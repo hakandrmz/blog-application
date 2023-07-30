@@ -23,5 +23,4 @@ public class GetPostDto {
   private boolean last;
   private Instant createdOn;
   private Instant lastUpdatedOn;
-  private String updatedBy;
 }

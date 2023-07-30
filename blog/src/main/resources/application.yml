@@ -1,9 +1,3 @@
-logging:
-  level:
-    org:
-      springframework:
-        security: debug
-
 app:
   jwt-expiration-milliseconds: 86400000
   jwt-secret: jlPSXaNvz1f6gRELt6s64sH2SygfY1TQWNwZbxncSwfwQpezmZdkCcHoCMwCFKKj

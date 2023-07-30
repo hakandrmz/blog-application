@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.controller;
 
+import guru.hakandurmaz.blog.config.LogPerformance;
 import guru.hakandurmaz.blog.payload.comment.CreateCommentRequest;
 import guru.hakandurmaz.blog.payload.comment.GetCommentDto;
 import guru.hakandurmaz.blog.payload.comment.UpdateCommentRequest;
@@ -29,6 +30,7 @@ public class CommentController {
     this.commentService = commentService;
   }
 
+  @LogPerformance
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PostMapping("posts/comments/{postId}")
   public Result createComment(
@@ -39,17 +41,20 @@ public class CommentController {
     return commentService.createComment(id, commentRequest, username);
   }
 
+  @LogPerformance
   @GetMapping("posts/{postId}/comments")
   public DataResult<List<GetCommentDto>> getCommentsByPostId(
       @PathVariable(value = "postId") Long postId) {
     return this.commentService.getCommentsByPostId(postId);
   }
 
+  @LogPerformance
   @GetMapping("comments/{id}")
   public DataResult<GetCommentDto> getCommentById(@PathVariable(value = "id") Long commentId) {
     return this.commentService.getCommentById(commentId);
   }
 
+  @LogPerformance
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PutMapping("/comments")
   public Result updateComment(
@@ -58,6 +63,7 @@ public class CommentController {
     return this.commentService.updateComment(commentRequest, username);
   }
 
+  @LogPerformance
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @DeleteMapping("comments/{id}")
   public Result deleteComment(
