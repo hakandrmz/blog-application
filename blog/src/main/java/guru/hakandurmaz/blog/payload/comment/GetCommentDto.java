@@ -17,5 +17,4 @@ public class GetCommentDto {
   private String body;
   private Instant createdOn;
   private Instant lastUpdatedOn;
-  private String updatedBy;
 }

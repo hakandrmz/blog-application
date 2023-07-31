@@ -1,11 +1,8 @@
-logging:
-  level:
-    org:
-      springframework:
-        security: debug
 app:
   jwt-expiration-milliseconds: 86400000
   jwt-secret: jlPSXaNvz1f6gRELt6s64sH2SygfY1TQWNwZbxncSwfwQpezmZdkCcHoCMwCFKKj
+  jwt-refresh-token:
+    expiration: 86400000
 spring:
   application:
     name: blogapp
@@ -56,6 +53,3 @@ springdoc:
     enabled: 'true'
     tryItOutEnabled: 'false'
     path: v3/api-docs/swagger-ui.html
-api:
-  version: 1.0
-  description: Role based auth with Spring Boot 3.1.1

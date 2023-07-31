@@ -1,7 +1,6 @@
 package guru.hakandurmaz.blog.entity;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +25,4 @@ public abstract class AbstractEntity {
 
   @UpdateTimestamp(source = SourceType.DB)
   private Instant lastUpdatedOn;
-
-  private String updatedBy;
 }

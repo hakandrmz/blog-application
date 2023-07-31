@@ -24,8 +24,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  zipkin:
-    base-url: http://zipkin:9411
   rabbitmq:
     addresses: rabbitmq:5672
 server:

@@ -1,7 +1,7 @@
 package guru.hakandurmaz.blog.config;
 
-import guru.hakandurmaz.blog.security.CustomUserDetailsService;
-import guru.hakandurmaz.blog.security.JwtAuthenticationEntryPoint;
+import guru.hakandurmaz.blog.security.UserDetailsService;
+import guru.hakandurmaz.blog.security.ApiAuthenticationEntryPoint;
 import guru.hakandurmaz.blog.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,9 +24,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final CustomUserDetailsService userDetailsService;
+  private final UserDetailsService userDetailsService;
 
-  private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+  private final ApiAuthenticationEntryPoint authenticationEntryPoint;
 
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -59,6 +59,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/**")
                     .permitAll()
                     .requestMatchers("/api/auth/**")
+                    .permitAll()
+                    .requestMatchers("/actuator/**")
                     .permitAll()
                     .requestMatchers("/v3/**")
                     .permitAll()

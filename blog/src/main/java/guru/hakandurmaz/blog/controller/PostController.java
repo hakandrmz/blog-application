@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.controller;
 
+import guru.hakandurmaz.blog.config.LogPerformance;
 import guru.hakandurmaz.blog.payload.post.CreatePostRequest;
 import guru.hakandurmaz.blog.payload.post.GetPostByIdDto;
 import guru.hakandurmaz.blog.payload.post.GetPostDto;
@@ -32,7 +33,7 @@ public class PostController {
   public PostController(PostService postService) {
     this.postService = postService;
   }
-
+  @LogPerformance
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PostMapping
   public Result createPost(
@@ -40,7 +41,8 @@ public class PostController {
     String username = authentication.getName();
     return this.postService.createPost(postRequest, username);
   }
-
+  
+  @LogPerformance
   @GetMapping("/username")
   public DataResult<GetPostDto> getAllPostsByUsername(
       @RequestParam(name = "username", required = false) String username,
@@ -63,12 +65,13 @@ public class PostController {
           String sortDir) {
     return this.postService.getAllPosts(username, pageNo, pageSize, sortBy, sortDir);
   }
-
+  @LogPerformance
   @GetMapping(value = "{id}")
   public DataResult<GetPostByIdDto> getPostById(@PathVariable(name = "id") long id) {
     return postService.getPostById(id);
   }
-
+  
+  @LogPerformance
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PutMapping
   public Result updatePost(
@@ -76,7 +79,8 @@ public class PostController {
     String username = authentication.getName();
     return postService.updatePost(postRequest, username);
   }
-
+  
+  @LogPerformance
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @DeleteMapping("{id}")
   public Result deletePost(@PathVariable(name = "id") long id, Authentication authentication) {
@@ -84,8 +88,27 @@ public class PostController {
     return postService.deletePostById(id, username);
   }
 
-  @GetMapping({"/search"})
-  public DataResult searchPost(@RequestParam("query") String query) {
-    return postService.listOfPosts(query);
+  @LogPerformance
+  @GetMapping("/search")
+  public DataResult<GetPostDto> searchPosts(
+          @RequestParam(name = "keyword", required = false) String keyword,
+          @RequestParam(
+                  value = "pageNo",
+                  defaultValue = AppConstants.DEFAULT_PAGE_NUMBER,
+                  required = false)
+          int pageNo,
+          @RequestParam(
+                  value = "pageSize",
+                  defaultValue = AppConstants.DEFAULT_PAGE_SIZE,
+                  required = false)
+          int pageSize,
+          @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false)
+          String sortBy,
+          @RequestParam(
+                  value = "sortDir",
+                  defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
+                  required = false)
+          String sortDir) {
+    return this.postService.listOfPosts(keyword, pageNo, pageSize, sortBy, sortDir);
   }
 }

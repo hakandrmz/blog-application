@@ -5,12 +5,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class ApiAuthenticationEntryPoint implements org.springframework.security.web.AuthenticationEntryPoint {
 
   @Override
   public void commence(

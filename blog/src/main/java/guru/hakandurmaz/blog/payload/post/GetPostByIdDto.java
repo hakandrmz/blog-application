@@ -19,5 +19,5 @@ public class GetPostByIdDto {
   private Set<CommentRequest> comments;
   private Instant createdOn;
   private Instant lastUpdatedOn;
-  private String updatedBy;
+  private String name;
 }
