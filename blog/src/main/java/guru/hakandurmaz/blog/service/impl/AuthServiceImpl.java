@@ -49,14 +49,14 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional
   public AuthenticationResponse registerUser(SignupRequest signupRequest) {
-    if (Boolean.TRUE.equals(userRepository.existsByUsername(signupRequest.getUsername()))) {
+    if (Boolean.TRUE.equals(userService.existsByUsername(signupRequest.getUsername()))) {
       throw new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.USERNAME_ALREADY_EXIST);
-    } else if (Boolean.TRUE.equals(userRepository.existsByEmail(signupRequest.getEmail()))) {
+    } else if (Boolean.TRUE.equals(userService.existsByEmail(signupRequest.getEmail()))) {
       throw new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.EMAIL_ALREADY_EXIST);
     }
     User user = generateUserFromRequest(signupRequest);
 
-    User savedUser = userRepository.save(user);
+    User savedUser = userService.createUser(user);
     String accessToken = jwtTokenProvider.generateToken(user);
     String refreshToken = jwtTokenProvider.generateRefreshToken(user);
     saveUserToken(savedUser, accessToken);
@@ -82,8 +82,8 @@ public class AuthServiceImpl implements AuthService {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
             request.getUsernameOrEmail(), request.getPassword()));
-    var user = userRepository.findByEmail(request.getUsernameOrEmail()).orElseThrow();
-    var jwtToken = jwtTokenProvider.generateToken(user);
+    User user = userService.getByEmail(request.getUsernameOrEmail());
+    String jwtToken = jwtTokenProvider.generateToken(user);
     var refreshToken = jwtTokenProvider.generateRefreshToken(user);
     revokeAllUserTokens(user);
     saveUserToken(user, jwtToken);
@@ -108,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public void changeUserPassword(User user, String password) {
     user.setPassword(passwordEncoder.encode(password));
-    userRepository.save(user);
+    userService.createUser(user);
   }
 
   @Override
@@ -155,10 +155,7 @@ public class AuthServiceImpl implements AuthService {
     userEmail = jwtTokenProvider.extractUsername(refreshToken);
     if (userEmail != null) {
 
-      User user =
-          userRepository
-              .findByEmail(userEmail)
-              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.USER_NOT_FOUND));
+      User user = userService.getUserByEmail(userEmail);
 
       if (jwtTokenProvider.isTokenValid(refreshToken, user)) {
         var accessToken = jwtTokenProvider.generateToken(user);

@@ -9,6 +9,7 @@ import guru.hakandurmaz.blog.service.AuthService;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.Result;
 import guru.hakandurmaz.blog.utils.results.SuccessDataResult;
+import guru.hakandurmaz.blog.utils.results.SuccessResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public class AuthController {
   @LogPerformance
   @PostMapping("/reset-password")
   public DataResult resetPassword(@RequestParam("email") String userEmail) {
-    return new DataResult(authService.resetPassword(userEmail), true);
+    return new SuccessDataResult(authService.resetPassword(userEmail));
   }
 
   @LogPerformance
@@ -51,8 +52,9 @@ public class AuthController {
 
   @LogPerformance
   @PostMapping("/refresh-token")
-  public void refreshToken(HttpServletRequest request, HttpServletResponse response)
+  public Result refreshToken(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     authService.refreshToken(request, response);
+    return new SuccessResult();
   }
 }

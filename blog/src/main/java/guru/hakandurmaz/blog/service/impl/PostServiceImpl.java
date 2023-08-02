@@ -111,11 +111,10 @@ public class PostServiceImpl implements PostService {
   }
 
   @Override
-  public DataResult listOfPosts(String query, int pageNo, int pageSize, String sortBy, String sortDir) {
+  public GetPostDto listOfPosts(String query, int pageNo, int pageSize, String sortBy, String sortDir) {
     Pageable pageable = getPageable(pageNo, pageSize, sortBy, sortDir);
     Page<Post> posts = postRepository.findByTitleContainingIgnoreCase(query, pageable);
-    GetPostDto response = this.configureResponse(posts);
-    return new SuccessDataResult(response);
+    return configureResponse(posts);
   }
 
   private GetPostDto configureResponse(Page<Post> posts) {

@@ -9,6 +9,7 @@ import guru.hakandurmaz.blog.service.PostService;
 import guru.hakandurmaz.blog.utils.constants.AppConstants;
 import guru.hakandurmaz.blog.utils.results.DataResult;
 import guru.hakandurmaz.blog.utils.results.Result;
+import guru.hakandurmaz.blog.utils.results.SuccessDataResult;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -109,6 +110,6 @@ public class PostController {
                   defaultValue = AppConstants.DEFAULT_SORT_DIRECTION,
                   required = false)
           String sortDir) {
-    return this.postService.listOfPosts(keyword, pageNo, pageSize, sortBy, sortDir);
+    return new SuccessDataResult(postService.listOfPosts(keyword, pageNo, pageSize, sortBy, sortDir));
   }
 }

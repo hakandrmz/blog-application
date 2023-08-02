@@ -29,4 +29,24 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(
             () -> new UsernameNotFoundException("Username not found with username: " + username));
   }
+
+  @Override
+  public Boolean existsByUsername(String username) {
+    return userRepository.existsByUsername(username);
+  }
+
+  @Override
+  public Boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
+  }
+
+  @Override
+  public User createUser(User user) {
+    return userRepository.save(user);
+  }
+
+  @Override
+  public User getByEmail(String usernameOrEmail) {
+    return userRepository.findByEmail(usernameOrEmail).orElseThrow();
+  }
 }
