@@ -1,6 +1,9 @@
 package guru.hakandurmaz.blog.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 import lombok.*;
@@ -17,13 +20,14 @@ import lombok.*;
       @UniqueConstraint(columnNames = {"username"}),
       @UniqueConstraint(columnNames = {"email"})
     })
-public class User extends AbstractEntity {
+public class User extends AbstractEntity  implements Serializable {
 
   private String name;
   private String username;
   private String email;
   private String password;
 
+  @JsonManagedReference
   @OneToMany(mappedBy = "user")
   private List<Token> tokens;
 

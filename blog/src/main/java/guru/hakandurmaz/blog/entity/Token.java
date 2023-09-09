@@ -1,8 +1,11 @@
 package guru.hakandurmaz.blog.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import guru.hakandurmaz.blog.payload.security.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -10,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Token extends AbstractEntity{
+public class Token extends AbstractEntity implements Serializable {
 
     @Column(unique = true)
     public String token;
@@ -23,6 +26,7 @@ public class Token extends AbstractEntity{
     public boolean expired;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "user_id")
     public User user;
 }
