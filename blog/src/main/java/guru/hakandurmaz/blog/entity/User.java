@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class User extends AbstractEntity {
   private String email;
   private String password;
 
+  @JsonManagedReference
   @OneToMany(mappedBy = "user")
   private List<Token> tokens;
 
@@ -33,5 +35,4 @@ public class User extends AbstractEntity {
       joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
-  
 }

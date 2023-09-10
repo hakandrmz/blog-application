@@ -25,7 +25,12 @@ spring:
     addresses: localhost:5672
     username: guest
     password: guest
-
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: my-password
+      username: my-username
 server:
   port: 8080
 eureka:

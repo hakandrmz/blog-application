@@ -3,8 +3,10 @@ package guru.hakandurmaz.blog.service.impl;
 import guru.hakandurmaz.blog.entity.User;
 import guru.hakandurmaz.blog.repository.UserRepository;
 import guru.hakandurmaz.blog.service.UserService;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -12,21 +14,29 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-  private final UserRepository userRepository;
 
-  @Override
-  public User getUserByUserName(String username) {
-    return userRepository
-        .findByUsername(username)
-        .orElseThrow(
-            () -> new UsernameNotFoundException("Username not found with username: " + username));
-  }
+    private final UserRepository userRepository;
+    private final RedisTemplate<String,User> userRedisTemplate;
+    @Override
+    public User getUserByUserName(String username) {
 
-  @Override
-  public User getUserByEmail(String username) {
-    return userRepository
-        .findByEmail(username)
-        .orElseThrow(
-            () -> new UsernameNotFoundException("Username not found with username: " + username));
-  }
+        User user = userRedisTemplate.opsForValue().get(username);
+        if (Objects.isNull(user)) {
+            user = userRepository
+                    .findByEmail(username)
+                    .orElseThrow(
+                            () -> new UsernameNotFoundException("Username not found with username: " + username));
+            userRedisTemplate.opsForValue().set(username,user);
+        }
+        return user;
+
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow(
+                        () -> new UsernameNotFoundException("Username not found with username: " + email));
+    }
 }

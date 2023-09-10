@@ -1,7 +1,7 @@
 package guru.hakandurmaz.blog.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.util.Date;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,14 +15,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 @RequiredArgsConstructor
 public abstract class AbstractEntity {
 
-  @Id
-  @SequenceGenerator(name = "blog_id_sequence", sequenceName = "blog_id_sequence")
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blog_id_sequence")
-  private long id;
+    @Id
+    @SequenceGenerator(name = "blog_id_sequence", sequenceName = "blog_id_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "blog_id_sequence")
+    private long id;
 
-  @CreationTimestamp(source = SourceType.DB)
-  private Instant createdOn;
+    @CreationTimestamp(source = SourceType.DB)
+    private Date createdOn;
 
-  @UpdateTimestamp(source = SourceType.DB)
-  private Instant lastUpdatedOn;
+    @UpdateTimestamp(source = SourceType.DB)
+    private Date lastUpdatedOn;
 }

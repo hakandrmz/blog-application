@@ -38,6 +38,14 @@ services:
     networks:
       - spring
 
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=my-password
+      - REDIS_USERNAME=my-username
+
 networks:
   postgres:
     driver: bridge

@@ -1,6 +1,5 @@
 package guru.hakandurmaz.blog.controller;
 
-import guru.hakandurmaz.blog.config.LogPerformance;
 import guru.hakandurmaz.blog.payload.post.CreatePostRequest;
 import guru.hakandurmaz.blog.payload.post.GetPostByIdDto;
 import guru.hakandurmaz.blog.payload.post.GetPostDto;
@@ -33,7 +32,7 @@ public class PostController {
   public PostController(PostService postService) {
     this.postService = postService;
   }
-  @LogPerformance
+  
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PostMapping
   public Result createPost(
@@ -42,7 +41,6 @@ public class PostController {
     return this.postService.createPost(postRequest, username);
   }
   
-  @LogPerformance
   @GetMapping("/username")
   public DataResult<GetPostDto> getAllPostsByUsername(
       @RequestParam(name = "username", required = false) String username,
@@ -65,13 +63,12 @@ public class PostController {
           String sortDir) {
     return this.postService.getAllPosts(username, pageNo, pageSize, sortBy, sortDir);
   }
-  @LogPerformance
+
   @GetMapping(value = "{id}")
   public DataResult<GetPostByIdDto> getPostById(@PathVariable(name = "id") long id) {
     return postService.getPostById(id);
   }
-  
-  @LogPerformance
+
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @PutMapping
   public Result updatePost(
@@ -79,16 +76,14 @@ public class PostController {
     String username = authentication.getName();
     return postService.updatePost(postRequest, username);
   }
-  
-  @LogPerformance
+
   @PreAuthorize("hasAnyRole('ADMIN','USER')")
   @DeleteMapping("{id}")
   public Result deletePost(@PathVariable(name = "id") long id, Authentication authentication) {
     String username = authentication.getName();
     return postService.deletePostById(id, username);
   }
-
-  @LogPerformance
+  
   @GetMapping("/search")
   public DataResult<GetPostDto> searchPosts(
           @RequestParam(name = "keyword", required = false) String keyword,
