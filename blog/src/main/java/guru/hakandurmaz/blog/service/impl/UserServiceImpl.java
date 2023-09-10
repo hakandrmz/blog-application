@@ -2,15 +2,13 @@ package guru.hakandurmaz.blog.service.impl;
 
 import guru.hakandurmaz.blog.entity.User;
 import guru.hakandurmaz.blog.repository.UserRepository;
-import guru.hakandurmaz.blog.service.CacheService;
 import guru.hakandurmaz.blog.service.UserService;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -18,20 +16,19 @@ import java.util.Objects;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final CacheService cacheService;
-
+    private final RedisTemplate<String,User> userRedisTemplate;
     @Override
     public User getUserByUserName(String username) {
 
-        Object user = cacheService.get(username);
+        User user = userRedisTemplate.opsForValue().get(username);
         if (Objects.isNull(user)) {
             user = userRepository
                     .findByEmail(username)
                     .orElseThrow(
                             () -> new UsernameNotFoundException("Username not found with username: " + username));
-            cacheService.set(username, user);
+            userRedisTemplate.opsForValue().set(username,user);
         }
-        return (User) user;
+        return user;
 
     }
 

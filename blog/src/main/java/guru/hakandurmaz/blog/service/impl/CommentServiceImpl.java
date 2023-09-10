@@ -10,7 +10,6 @@ import guru.hakandurmaz.blog.payload.comment.GetCommentDto;
 import guru.hakandurmaz.blog.payload.comment.UpdateCommentRequest;
 import guru.hakandurmaz.blog.repository.CommentRepository;
 import guru.hakandurmaz.blog.repository.PostRepository;
-import guru.hakandurmaz.blog.service.CacheService;
 import guru.hakandurmaz.blog.service.CommentService;
 import guru.hakandurmaz.blog.service.UserService;
 import guru.hakandurmaz.blog.utils.mappers.ModelMapperService;
@@ -20,11 +19,9 @@ import guru.hakandurmaz.blog.utils.results.ErrorResult;
 import guru.hakandurmaz.blog.utils.results.Result;
 import guru.hakandurmaz.blog.utils.results.SuccessDataResult;
 import guru.hakandurmaz.blog.utils.results.SuccessResult;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;

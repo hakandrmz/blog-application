@@ -5,15 +5,13 @@ import guru.hakandurmaz.blog.payload.security.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serializable;
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Token extends AbstractEntity implements Serializable {
+public class Token extends AbstractEntity {
 
     @Column(unique = true)
     public String token;

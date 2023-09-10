@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
   private final TokenRepository tokenRepository;
@@ -66,10 +65,12 @@ public class AuthServiceImpl implements AuthService {
             user.getId(), user.getEmail(), "Welcome to my blog" + user.getName());
 
     rabbitMQMessageProducer.publish(
-        notificationRequest, AmqpConstants.INTERNAL_EXCHANGE, AmqpConstants.INTERNAL_NOTIFICATION_ROUTING_KEY);
+        notificationRequest,
+        AmqpConstants.INTERNAL_EXCHANGE,
+        AmqpConstants.INTERNAL_NOTIFICATION_ROUTING_KEY);
 
     return AuthenticationResponse.builder()
-            .tokenType(AppConstants.BEARER)
+        .tokenType(AppConstants.BEARER)
         .accessToken(accessToken)
         .refreshToken(refreshToken)
         .build();
@@ -90,6 +91,7 @@ public class AuthServiceImpl implements AuthService {
     return AuthenticationResponse.builder()
         .accessToken(jwtToken)
         .refreshToken(refreshToken)
+        .tokenType(AppConstants.BEARER_)
         .build();
   }
 
@@ -113,11 +115,10 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public String updateUserPassword(PasswordDto passwordDto) {
+  public void updateUserPassword(PasswordDto passwordDto) {
     PasswordResetToken passwordResetToken = validatePasswordResetToken(passwordDto.getToken());
     changeUserPassword(passwordResetToken.getUser(), passwordDto.getNewPassword());
     passwordTokenRepository.deleteByToken(passwordDto.getToken());
-    return "Password changed.";
   }
 
   private void checkTokenDate(PasswordResetToken passToken) {
@@ -131,7 +132,8 @@ public class AuthServiceImpl implements AuthService {
     final PasswordResetToken passToken =
         passwordTokenRepository
             .findByToken(token)
-            .orElseThrow(() -> new BlogAPIException(HttpStatus.NOT_FOUND, AppConstants.TOKEN_NOT_FOUND));
+            .orElseThrow(
+                () -> new BlogAPIException(HttpStatus.NOT_FOUND, AppConstants.TOKEN_NOT_FOUND));
     checkTokenDate(passToken);
     return passToken;
   }
@@ -158,7 +160,8 @@ public class AuthServiceImpl implements AuthService {
       User user =
           userRepository
               .findByEmail(userEmail)
-              .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.USER_NOT_FOUND));
+              .orElseThrow(
+                  () -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.USER_NOT_FOUND));
 
       if (jwtTokenProvider.isTokenValid(refreshToken, user)) {
         var accessToken = jwtTokenProvider.generateToken(user);
@@ -207,7 +210,8 @@ public class AuthServiceImpl implements AuthService {
     Role roles =
         roleRepository
             .findByName(AppConstants.ROLE_USER)
-            .orElseThrow(() -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.ROLE_NOT_FOUND));
+            .orElseThrow(
+                () -> new BlogAPIException(HttpStatus.BAD_REQUEST, AppConstants.ROLE_NOT_FOUND));
     user.setRoles(Collections.singleton(roles));
     return user;
   }

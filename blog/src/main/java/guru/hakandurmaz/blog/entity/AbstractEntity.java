@@ -1,12 +1,7 @@
 package guru.hakandurmaz.blog.entity;
 
 import jakarta.persistence.*;
-
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Date;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

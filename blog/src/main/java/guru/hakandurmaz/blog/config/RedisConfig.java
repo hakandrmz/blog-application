@@ -1,5 +1,6 @@
 package guru.hakandurmaz.blog.config;
 
+import guru.hakandurmaz.blog.entity.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -7,7 +8,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableRedisRepositories
@@ -19,14 +19,11 @@ public class RedisConfig {
   }
 
   @Bean
-  public RedisTemplate<String, String> redisTemplate(
+  public RedisTemplate<String, User> userRedisTemplate(
       RedisConnectionFactory redisConnectionFactory) {
-    RedisTemplate<String, String> template = new RedisTemplate<>();
+    RedisTemplate<String, User> template = new RedisTemplate<>();
     template.setConnectionFactory(redisConnectionFactory);
-    template.setKeySerializer(new StringRedisSerializer());
-    template.setValueSerializer(new StringRedisSerializer());
-    template.setHashKeySerializer(new StringRedisSerializer());
-    template.setHashValueSerializer(new StringRedisSerializer());
+    template.setValueSerializer(new Jackson2JsonRedisSerializer<>(User.class));
     return template;
   }
 }

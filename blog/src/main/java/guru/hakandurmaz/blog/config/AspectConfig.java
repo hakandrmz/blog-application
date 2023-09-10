@@ -11,13 +11,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AspectConfig {
 
-    @Around("@annotation(LogPerformance)")
-    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
-        long start = System.currentTimeMillis();
-        Object proceed = joinPoint.proceed();
-        long executionTime = System.currentTimeMillis() - start;
-        log.info(joinPoint.getSignature() + " executed in " + executionTime + "ms");
-        return proceed;
-    }
-
+  @Around("@annotation(LogPerformance)")
+  public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+    long start = System.currentTimeMillis();
+    Object proceed = joinPoint.proceed();
+    long executionTime = System.currentTimeMillis() - start;
+    log.info(joinPoint.getSignature() + " executed in " + executionTime + "ms");
+    return proceed;
+  }
 }

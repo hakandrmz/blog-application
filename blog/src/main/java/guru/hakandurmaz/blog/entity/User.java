@@ -2,8 +2,6 @@ package guru.hakandurmaz.blog.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 import lombok.*;
@@ -20,7 +18,7 @@ import lombok.*;
       @UniqueConstraint(columnNames = {"username"}),
       @UniqueConstraint(columnNames = {"email"})
     })
-public class User extends AbstractEntity  implements Serializable {
+public class User extends AbstractEntity {
 
   private String name;
   private String username;
@@ -37,5 +35,4 @@ public class User extends AbstractEntity  implements Serializable {
       joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
       inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
-  
 }

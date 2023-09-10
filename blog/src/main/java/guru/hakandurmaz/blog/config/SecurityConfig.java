@@ -1,8 +1,8 @@
 package guru.hakandurmaz.blog.config;
 
-import guru.hakandurmaz.blog.security.UserDetailsService;
 import guru.hakandurmaz.blog.security.ApiAuthenticationEntryPoint;
 import guru.hakandurmaz.blog.security.JwtAuthenticationFilter;
+import guru.hakandurmaz.blog.security.UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

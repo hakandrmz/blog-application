@@ -22,7 +22,7 @@ public interface AuthService {
 
   void changeUserPassword(User user, String newPassword);
 
-  String updateUserPassword(PasswordDto passwordDto);
+  void updateUserPassword(PasswordDto passwordDto);
 
   void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }
