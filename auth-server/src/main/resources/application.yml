@@ -1,3 +1,8 @@
+app:
+  jwt-expiration-milliseconds: 86400000
+  jwt-secret: jlPSXaNvz1f6gRELt6s64sH2SygfY1TQWNwZbxncSwfwQpezmZdkCcHoCMwCFKKj
+  jwt-refresh-token:
+    expiration: 86400000
 spring:
   application:
     name: auth-server
