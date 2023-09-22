@@ -1,11 +1,6 @@
-app:
-  jwt-expiration-milliseconds: 86400000
-  jwt-secret: jlPSXaNvz1f6gRELt6s64sH2SygfY1TQWNwZbxncSwfwQpezmZdkCcHoCMwCFKKj
-  jwt-refresh-token:
-    expiration: 86400000
 spring:
   application:
-    name: blogapp
+    name: auth-server
   datasource:
     username: hdurmaz
     url: jdbc:postgresql://localhost:5432/hdurmaz
@@ -21,18 +16,8 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-  rabbitmq:
-    addresses: localhost:5672
-    username: guest
-    password: guest
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: my-password
-      username: my-username
 server:
-  port: 8080
+  port: 8084
 eureka:
   client:
     service-url:
@@ -49,12 +34,3 @@ management:
       show-details: always
     shutdown:
       enabled: true
-springdoc:
-  swagger-ui:
-    operationsSorter: method
-    filter: 'false'
-    syntaxHighlight:
-      activated: 'true'
-    enabled: 'true'
-    tryItOutEnabled: 'false'
-    path: v3/api-docs/swagger-ui.html
